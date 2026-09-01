@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Uberide</title>
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <button class="icon-button" type="button" aria-label="Account">&#9675;</button>
+      <div class="wordmark">Uberide</div>
+      <button class="icon-button" type="button" aria-label="Menu">&#9776;</button>
+    </header>
+
+    <nav class="tabs" aria-label="Sections">
+      <button id="foodTab" class="tab active" type="button">&#127869; Food</button>
+      <button id="ridesTab" class="tab" type="button">&#128663; Rides</button>
+    </nav>
+
+    <main>
+      <section id="foodSection" class="section active-section">
+        <div class="heading-row">
+          <div>
+            <h1>Order food</h1>
+            <p>Real restaurants, then checkout on Uber Eats.</p>
+          </div>
+          <span class="nearby">&#9679; Nearby</span>
+        </div>
+        <div class="search-box">
+          <span class="search-icon">&#128269;</span>
+          <input id="foodSearch" type="search" placeholder="Search restaurants or cuisine" autocomplete="off">
+        </div>
+        <div id="foodList" class="list-card"></div>
+        <button class="wide-button" type="button" data-url="https://www.ubereats.com/">Open Uber Eats &#8599;</button>
+      </section>
+
+      <section id="ridesSection" class="section">
+        <div class="heading-row">
+          <div>
+            <h1>Request a ride</h1>
+            <p>Choose an Uber-style ride, then continue on Uber.</p>
+          </div>
+          <span class="nearby">&#9679; Nearby</span>
+        </div>
+        <div class="search-box">
+          <span class="search-icon">&#128269;</span>
+          <input id="rideSearch" type="search" placeholder="Search ride type" autocomplete="off">
+        </div>
+        <div id="rideList" class="ride-list"></div>
+        <button class="wide-button" type="button" data-url="https://m.uber.com/ul/">Open Uber &#8599;</button>
+      </section>
+    </main>
+
+    <p class="disclaimer">Uberide is an independent shortcut interface. Checkout, payment, accounts, and ride requests happen on Uber's official website.</p>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
