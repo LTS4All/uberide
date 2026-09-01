@@ -1,16 +1,18 @@
 # Uberide legacy iOS target
 
-This folder contains the Objective-C integration starter for a native iOS 9.3.5 build. The preview app in the root is an Expo prototype; Expo SDK 54 itself does not run on iOS 9.3.5, so the native target must be built separately with a legacy-compatible MapLibre Native iOS release.
+This folder contains the Objective-C integration starter for a native iOS 9.3.5 build. `UBRHomeViewController` is the compact iPod-oriented Food/Rides UI; it intentionally does not display a map. The preview app in the root is an Expo prototype; Expo SDK 54 itself does not run on iOS 9.3.5, so the native target must be built separately.
 
 ## Map
 
-`UBRMapViewController` uses MapLibre Native and the public OpenFreeMap Liberty style:
+The earlier `UBRMapViewController` sample uses MapLibre Native and the public OpenFreeMap Liberty style:
 
 ```text
 https://tiles.openfreemap.org/styles/liberty
 ```
 
 Keep OpenStreetMap/OpenMapTiles attribution visible in the shipped map UI and follow OpenFreeMap's current usage terms.
+
+The current Uberide screen does not use or show this map controller, per the product design request. It can be removed from a native target if map support is not planned.
 
 ## Uber API
 
