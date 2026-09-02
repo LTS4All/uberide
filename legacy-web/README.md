@@ -10,7 +10,7 @@ Upload the contents of this folder to any HTTPS static host, such as GitHub Page
 
 ## Nearby places and photos
 
-The FIND button geocodes the typed location with OpenStreetMap Nominatim and requests nearby named food places from the public Overpass API. Use this as a low-volume, user-triggered lookup and follow each service's current usage policy. The cards show the location, place name, and review availability; they do not invent review scores. Local open-photo assets are used as lightweight visual fallbacks because many OpenStreetMap places do not publish a photo.
+The FIND button geocodes any typed US or UK location with OpenStreetMap Nominatim and requests up to 100 nearby named food places within 8 km from the public Overpass API. USE MY LOCATION uses the iPod browser's embedded geolocation permission, then performs the same nearby lookup. Use these as low-volume, user-triggered lookups and follow each service's current usage policy. The cards show the location, place name, and review availability; they do not invent review scores. Local open-photo assets are used as lightweight visual fallbacks because many OpenStreetMap places do not publish a photo.
 
 The optional AI button sends the returned place list to OpenRouter using the key the user enters for that browser session. The key is not written to local storage, committed to GitHub, or embedded in the site. For a public production site, proxy the AI call through your own server so the key is not exposed to the browser.
 

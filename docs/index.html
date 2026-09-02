@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>Uberide</title>
   <link rel="apple-touch-icon" href="icon.png">
-  <link rel="stylesheet" href="style.css?v=ios6-places2">
+  <link rel="stylesheet" href="style.css?v=ios6-places3">
 </head>
 <body>
   <div class="app-shell">
@@ -27,13 +27,13 @@
         <div class="heading-row">
           <div>
             <h1>Nearby food</h1>
-            <p>Find places, read details, then continue on Uber Eats.</p>
+            <p>Type any US or UK location, or use your device location.</p>
           </div>
           <span class="nearby">&#9679; READY</span>
         </div>
         <div class="search-box location-search">
           <span class="search-icon">&#128205;</span>
-          <input id="locationInput" type="search" placeholder="Town, street or postcode" autocomplete="off">
+          <input id="locationInput" type="search" placeholder="US or UK town, street or postcode" autocomplete="off">
           <button id="findButton" type="button">FIND</button>
         </div>
         <button id="myLocationButton" class="location-button" type="button">USE MY LOCATION</button>
@@ -46,7 +46,6 @@
         </div>
         <div id="status" class="status" aria-live="polite">Type a location or use your location.</div>
         <div id="foodList" class="list-card"></div>
-        <button class="wide-button" type="button" data-url="https://www.ubereats.com/">OPEN UBER EATS &#8594;</button>
       </section>
 
       <section id="ridesSection" class="section">
@@ -80,6 +79,6 @@
 
     <p class="disclaimer">Uberide is an independent interface. Checkout, payment, accounts, and ride requests happen on official Uber websites.</p>
   </div>
-  <script src="app.js?v=places2"></script>
+  <script src="app.js?v=places3"></script>
 </body>
 </html>

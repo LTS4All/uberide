@@ -164,7 +164,7 @@
   }
 
   function lookupNearbyCoordinates(latitude, longitude, locationName) {
-    var query = '[out:json][timeout:20];nwr(around:5000,' + latitude + ',' + longitude + ')[amenity~"restaurant|cafe|fast_food|food_court|pub"];out center;';
+    var query = '[out:json][timeout:30];nwr(around:8000,' + latitude + ',' + longitude + ')[amenity~"restaurant|cafe|fast_food|food_court|pub"];out center;';
     setStatus('Loading places near ' + safe(locationName) + '...');
     xhr('GET', 'https://overpass-api.de/api/interpreter?data=' + encode(query), null, function (error, text) {
       if (error) { setStatus('Nearby place service is busy. Try again in a moment.'); return; }
@@ -180,7 +180,7 @@
     var item;
     var name;
     try { response = JSON.parse(text); elements = response.elements || []; } catch (ignore) { elements = []; }
-    for (i = 0; i < elements.length && nextPlaces.length < 30; i += 1) {
+    for (i = 0; i < elements.length && nextPlaces.length < 100; i += 1) {
       item = elements[i];
       name = item.tags && item.tags.name;
       if (!name) { continue; }
