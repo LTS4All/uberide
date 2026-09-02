@@ -5,23 +5,27 @@
     { name: 'Pret A Manger', cuisine: 'Sandwiches · Coffee', note: 'Popular near you', review: 'Reviews supplied by the place data source', photo: 'photos/food-table.jpg' },
     { name: 'PizzaExpress', cuisine: 'Pizza · Italian', note: 'Comfort food favourites', review: 'Reviews supplied by the place data source', photo: 'photos/food-table.jpg' },
     { name: 'Five Guys', cuisine: 'Burgers · American', note: 'Made to order', review: 'Reviews supplied by the place data source', photo: 'photos/restaurant-exterior.jpg' },
-    { name: 'Wagamama', cuisine: 'Japanese · Noodles', note: 'Fresh bowls and sides', review: 'Reviews supplied by the place data source', photo: 'photos/restaurant-exterior.jpg' }
+    { name: 'Wagamama', cuisine: 'Japanese · Noodles', note: 'Fresh bowls and sides', review: 'Reviews supplied by the place data source', photo: 'photos/restaurant-exterior.jpg' },
+    { name: 'Costa Coffee', cuisine: 'Coffee · Bakery', note: 'Coffee and light bites', review: 'Reviews not provided by the data source', photo: 'photos/food-table.jpg' },
+    { name: 'Nando\'s', cuisine: 'Chicken · Portuguese', note: 'Grilled chicken and sides', review: 'Reviews not provided by the data source', photo: 'photos/restaurant-exterior.jpg' },
+    { name: 'Dishoom', cuisine: 'Indian · Breakfast', note: 'Small plates and chai', review: 'Reviews not provided by the data source', photo: 'photos/food-table.jpg' },
+    { name: 'Honest Burgers', cuisine: 'Burgers · British', note: 'Burgers and rosemary chips', review: 'Reviews not provided by the data source', photo: 'photos/restaurant-exterior.jpg' }
   ];
   var rides = [
-    { name: 'UberX', detail: 'Affordable everyday rides', note: 'Continue securely on Uber', icon: '&#128663;' },
-    { name: 'Uber Comfort', detail: 'Extra legroom and comfort', note: 'Continue securely on Uber', icon: '&#128186;' },
-    { name: 'UberXL', detail: 'Room for more passengers', note: 'Continue securely on Uber', icon: '&#128652;' }
+    { name: 'UberX', detail: 'Affordable everyday rides', note: 'Continue securely on Uber', icon: 'X' },
+    { name: 'Uber Comfort', detail: 'Extra legroom and comfort', note: 'Continue securely on Uber', icon: 'C' },
+    { name: 'UberXL', detail: 'Room for more passengers', note: 'Continue securely on Uber', icon: 'L' }
   ];
   var places = foods.slice(0);
   var lastLocation = '';
+  var selectedPlace = null;
+  var currentCoordinates = null;
 
   function byId(id) { return document.getElementById(id); }
-
-  function setStatus(message) { byId('status').innerHTML = message; }
-
-  function openOfficialSite(url) { window.location.href = url; }
-
   function encode(value) { return encodeURIComponent(value || ''); }
+  function safe(value) { return String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+  function setStatus(message) { byId('status').innerHTML = message; }
+  function openOfficialSite(url) { window.location.href = url; }
 
   function xhr(method, url, body, callback) {
     var request = new XMLHttpRequest();
@@ -30,11 +34,8 @@
     if (method === 'POST') { request.setRequestHeader('Content-Type', 'application/json'); }
     request.onreadystatechange = function () {
       if (request.readyState !== 4) { return; }
-      if (request.status >= 200 && request.status < 300) {
-        callback(null, request.responseText);
-      } else {
-        callback(new Error('Request failed: ' + request.status), null);
-      }
+      if (request.status >= 200 && request.status < 300) { callback(null, request.responseText); }
+      else { callback(new Error('Request failed: ' + request.status), null); }
     };
     request.onerror = function () { callback(new Error('Network request failed'), null); };
     request.send(body || null);
@@ -49,15 +50,15 @@
     var matches = 0;
     for (i = 0; i < places.length; i += 1) {
       item = places[i];
-      if (q && (item.name + ' ' + item.cuisine + ' ' + item.location).toLowerCase().indexOf(q) === -1) { continue; }
+      if (q && (item.name + ' ' + item.cuisine + ' ' + (item.location || '')).toLowerCase().indexOf(q) === -1) { continue; }
       matches += 1;
-      html += '<div class="place-row"><div class="photo-cell"><img class="place-photo" src="' + (item.photo || 'photos/food-table.jpg') + '" alt="' + item.name + '"></div>';
-      html += '<div class="row-copy"><strong>' + item.name + '</strong><small>' + (item.location || item.cuisine || 'Food place') + '</small><em>' + (item.cuisine || item.note || 'Nearby place') + '</em>';
-      html += '<span class="review">' + (item.review || 'Reviews not provided') + '</span></div>';
+      html += '<div class="place-row" data-place-index="' + i + '"><div class="photo-cell"><img class="place-photo" src="' + safe(item.photo || 'photos/food-table.jpg') + '" alt="' + safe(item.name) + '"></div>';
+      html += '<div class="row-copy"><strong>' + safe(item.name) + '</strong><small>' + safe(item.location || item.cuisine || 'Food place') + '</small><em>' + safe(item.cuisine || item.note || 'Nearby place') + '</em><span class="review">' + safe(item.review || 'Reviews not provided') + '</span></div>';
       html += '<div class="action-cell"><button class="buy-button" type="button" data-url="https://www.ubereats.com/">BUY</button></div></div>';
     }
     list.innerHTML = matches ? html : '<div class="empty">No places found. Try another location or place name.</div>';
     bindExternalButtons(list);
+    bindPlaceRows(list);
   }
 
   function renderRides(query) {
@@ -71,9 +72,7 @@
       item = rides[i];
       if (q && item.name.toLowerCase().indexOf(q) === -1) { continue; }
       matches += 1;
-      html += '<div class="ride-row"><div class="row-icon"><span>' + item.icon + '</span></div>';
-      html += '<div class="row-copy"><strong>' + item.name + '</strong><small>' + item.detail + '</small><em>' + item.note + '</em></div>';
-      html += '<div class="action-cell"><button class="go-button" type="button" data-url="https://m.uber.com/ul/">GO</button></div></div>';
+      html += '<div class="ride-row"><div class="row-icon"><span>' + item.icon + '</span></div><div class="row-copy"><strong>' + item.name + '</strong><small>' + item.detail + '</small><em>' + item.note + '</em></div><div class="action-cell"><button class="go-button" type="button" data-url="https://m.uber.com/ul/">GO</button></div></div>';
     }
     list.innerHTML = matches ? html : '<div class="empty">No ride types found.</div>';
     bindExternalButtons(list);
@@ -83,7 +82,19 @@
     var buttons = root.querySelectorAll('[data-url]');
     var i;
     for (i = 0; i < buttons.length; i += 1) {
-      buttons[i].onclick = function () { openOfficialSite(this.getAttribute('data-url')); };
+      buttons[i].onclick = function (event) {
+        if (event) { event.cancelBubble = true; }
+        openOfficialSite(this.getAttribute('data-url'));
+        return false;
+      };
+    }
+  }
+
+  function bindPlaceRows(root) {
+    var rows = root.querySelectorAll('[data-place-index]');
+    var i;
+    for (i = 0; i < rows.length; i += 1) {
+      rows[i].onclick = function () { showDetails(places[parseInt(this.getAttribute('data-place-index'), 10)]); };
     }
   }
 
@@ -93,33 +104,71 @@
     var foodTab = byId('foodTab');
     var ridesTab = byId('ridesTab');
     if (section === 'food') {
-      food.className = 'section active-section';
-      ridesSection.className = 'section';
-      foodTab.className = 'tab active';
-      ridesTab.className = 'tab';
+      food.className = 'section active-section'; ridesSection.className = 'section'; foodTab.className = 'tab active'; ridesTab.className = 'tab';
     } else {
-      food.className = 'section';
-      ridesSection.className = 'section active-section';
-      foodTab.className = 'tab';
-      ridesTab.className = 'tab active';
+      food.className = 'section'; ridesSection.className = 'section active-section'; foodTab.className = 'tab'; ridesTab.className = 'tab active';
     }
   }
 
-  function locationSearchDone(error, text, locationName) {
-    var result;
-    var latitude;
-    var longitude;
-    var query;
-    if (error) { setStatus('Location lookup failed. Check the spelling and try again.'); return; }
-    try { result = JSON.parse(text)[0]; } catch (ignore) { result = null; }
-    if (!result) { setStatus('Location not found. Try a town, street, or postcode.'); return; }
-    latitude = result.lat;
-    longitude = result.lon;
-    query = '[out:json][timeout:20];nwr(around:3500,' + latitude + ',' + longitude + ')[amenity~"restaurant|cafe|fast_food|food_court"];out center;';
-    setStatus('Loading places near ' + locationName + '...');
-    xhr('GET', 'https://overpass-api.de/api/interpreter?data=' + encode(query), null, function (overpassError, overpassText) {
-      if (overpassError) { setStatus('Nearby place service is busy. Try again in a moment.'); return; }
-      showNearbyPlaces(overpassText, locationName);
+  function directionsUrl(place) {
+    var destination = place.name + ', ' + (place.location || lastLocation || '');
+    if (place.lat && place.lon) { destination = place.lat + ',' + place.lon; }
+    return 'https://www.google.com/maps/dir/?api=1&destination=' + encode(destination);
+  }
+
+  function showDetails(place) {
+    var body;
+    selectedPlace = place;
+    body = '<img class="detail-photo" src="' + safe(place.photo || 'photos/food-table.jpg') + '" alt="' + safe(place.name) + '">';
+    body += '<p><strong>Location</strong><br>' + safe(place.location || lastLocation || 'Location not supplied') + '</p>';
+    body += '<p><strong>Place name</strong><br>' + safe(place.name) + '</p>';
+    body += '<p><strong>Category</strong><br>' + safe(place.cuisine || 'Food place') + '</p>';
+    body += '<p><strong>Reviews</strong><br>' + safe(place.review || 'Reviews not provided by the data source') + '</p>';
+    body += '<p class="detail-hint">Tap GET DIRECTIONS for Google Maps, or OPEN ON UBER EATS to order.</p>';
+    byId('detailTitle').innerHTML = safe(place.name);
+    byId('detailBody').innerHTML = body;
+    byId('detailPanel').className = 'detail-panel visible';
+    byId('detailPanel').setAttribute('aria-hidden', 'false');
+    byId('aiOverviewBox').className = 'ai-overview';
+    byId('aiOverviewBox').setAttribute('aria-hidden', 'true');
+  }
+
+  function closeDetails() {
+    byId('detailPanel').className = 'detail-panel';
+    byId('detailPanel').setAttribute('aria-hidden', 'true');
+    selectedPlace = null;
+  }
+
+  function requestLocation() {
+    if (!navigator.geolocation) { setStatus('This iPod browser cannot provide location. Type a location instead.'); return; }
+    setStatus('Requesting your location...');
+    navigator.geolocation.getCurrentPosition(function (position) {
+      currentCoordinates = { lat: position.coords.latitude, lon: position.coords.longitude };
+      lastLocation = 'your current location';
+      lookupNearbyCoordinates(currentCoordinates.lat, currentCoordinates.lon, lastLocation);
+    }, function () {
+      setStatus('Location permission was not granted. Type a town or postcode instead.');
+    }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 });
+  }
+
+  function lookupLocationName(name) {
+    setStatus('Finding ' + safe(name) + '...');
+    xhr('GET', 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=' + encode(name), null, function (error, text) {
+      var result;
+      if (error) { setStatus('Location lookup failed. Check the spelling and try again.'); return; }
+      try { result = JSON.parse(text)[0]; } catch (ignore) { result = null; }
+      if (!result) { setStatus('Location not found. Try a town, street, or postcode.'); return; }
+      currentCoordinates = { lat: result.lat, lon: result.lon };
+      lookupNearbyCoordinates(result.lat, result.lon, name);
+    });
+  }
+
+  function lookupNearbyCoordinates(latitude, longitude, locationName) {
+    var query = '[out:json][timeout:20];nwr(around:5000,' + latitude + ',' + longitude + ')[amenity~"restaurant|cafe|fast_food|food_court|pub"];out center;';
+    setStatus('Loading places near ' + safe(locationName) + '...');
+    xhr('GET', 'https://overpass-api.de/api/interpreter?data=' + encode(query), null, function (error, text) {
+      if (error) { setStatus('Nearby place service is busy. Try again in a moment.'); return; }
+      showNearbyPlaces(text, locationName);
     });
   }
 
@@ -131,33 +180,17 @@
     var item;
     var name;
     try { response = JSON.parse(text); elements = response.elements || []; } catch (ignore) { elements = []; }
-    for (i = 0; i < elements.length && nextPlaces.length < 18; i += 1) {
+    for (i = 0; i < elements.length && nextPlaces.length < 30; i += 1) {
       item = elements[i];
       name = item.tags && item.tags.name;
       if (!name) { continue; }
-      nextPlaces.push({
-        name: name,
-        cuisine: (item.tags.cuisine || item.tags.amenity || 'Food place').replace(/_/g, ' '),
-        location: locationName,
-        note: 'Found nearby with OpenStreetMap',
-        review: item.tags && item.tags['contact:website'] ? 'Website available' : 'Reviews not provided by OpenStreetMap',
-        photo: i % 2 ? 'photos/food-table.jpg' : 'photos/restaurant-exterior.jpg'
-      });
+      nextPlaces.push({ name: name, cuisine: (item.tags.cuisine || item.tags.amenity || 'Food place').replace(/_/g, ' '), location: locationName, note: 'Found nearby with OpenStreetMap', review: item.tags && item.tags['contact:website'] ? 'Website available' : 'Reviews not provided by OpenStreetMap', lat: item.lat || (item.center && item.center.lat), lon: item.lon || (item.center && item.center.lon), photo: i % 2 ? 'photos/food-table.jpg' : 'photos/restaurant-exterior.jpg' });
     }
-    if (!nextPlaces.length) { setStatus('No named food places were found near ' + locationName + '.'); return; }
+    if (!nextPlaces.length) { setStatus('No named food places were found near ' + safe(locationName) + '.'); return; }
     places = nextPlaces;
     lastLocation = locationName;
     renderFood('');
-    setStatus('Found ' + nextPlaces.length + ' named places near ' + locationName + '.');
-  }
-
-  function findPlaces() {
-    var locationName = byId('locationInput').value.replace(/^\s+|\s+$/g, '');
-    if (!locationName) { setStatus('Type a location first.'); return; }
-    setStatus('Finding ' + locationName + '...');
-    xhr('GET', 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=' + encode(locationName), null, function (error, text) {
-      locationSearchDone(error, text, locationName);
-    });
+    setStatus('Found ' + nextPlaces.length + ' places near ' + safe(locationName) + '. Tap a place for details.');
   }
 
   function rankWithOpenRouter() {
@@ -165,13 +198,10 @@
     var model = byId('openRouterModel').value.replace(/^\s+|\s+$/g, '') || 'openai/gpt-4o-mini';
     var prompt;
     var payload;
-    if (!key) { setStatus('Add your OpenRouter key first, or use FIND to load places without AI.'); return; }
+    if (!key) { setStatus('Add your OpenRouter key first, or find places without AI.'); return; }
     if (!places.length) { setStatus('Find places near a location first.'); return; }
-    prompt = 'Rank these nearby places for a user. Return only a JSON array of the place names in the best order. Do not invent places. Places: ' + JSON.stringify(places);
-    payload = JSON.stringify({ model: model, temperature: 0, messages: [
-      { role: 'system', content: 'You rank nearby food places. Return only valid JSON.' },
-      { role: 'user', content: prompt }
-    ] });
+    prompt = 'Rank these nearby food places for a user. Return only a JSON array of the place names in the best order. Do not invent places or reviews. Places: ' + JSON.stringify(places);
+    payload = JSON.stringify({ model: model, temperature: 0, messages: [{ role: 'system', content: 'You rank nearby food places. Return only valid JSON.' }, { role: 'user', content: prompt }] });
     setStatus('Asking OpenRouter to rank the places...');
     xhr('POST', 'https://openrouter.ai/api/v1/chat/completions', payload, function (error, text) {
       var response;
@@ -184,26 +214,44 @@
       try { response = JSON.parse(text); content = response.choices[0].message.content; } catch (ignore) { content = ''; }
       try { names = JSON.parse(content.replace(/```json|```/g, '').replace(/^\s+|\s+$/g, '')); } catch (ignoreAgain) { names = []; }
       if (!(names instanceof Array)) { setStatus('OpenRouter returned an unexpected ranking.'); return; }
-      for (i = 0; i < names.length; i += 1) {
-        for (j = 0; j < places.length; j += 1) {
-          if (places[j].name === names[i]) { ranked.push(places[j]); break; }
-        }
-      }
-      for (i = 0; i < places.length; i += 1) {
-        if (ranked.indexOf(places[i]) === -1) { ranked.push(places[i]); }
-      }
-      places = ranked;
-      renderFood('');
-      setStatus('AI ranking applied' + (lastLocation ? ' near ' + lastLocation : '') + '.');
+      for (i = 0; i < names.length; i += 1) { for (j = 0; j < places.length; j += 1) { if (places[j].name === names[i]) { ranked.push(places[j]); break; } } }
+      for (i = 0; i < places.length; i += 1) { if (ranked.indexOf(places[i]) === -1) { ranked.push(places[i]); } }
+      places = ranked; renderFood(''); setStatus('AI ranking applied. Tap a place for its overview.');
+    });
+  }
+
+  function requestAiOverview() {
+    var key = byId('openRouterKey').value.replace(/^\s+|\s+$/g, '');
+    var model = byId('openRouterModel').value.replace(/^\s+|\s+$/g, '') || 'openai/gpt-4o-mini';
+    var prompt;
+    var payload;
+    if (!selectedPlace) { return; }
+    if (!key) { byId('aiOverviewText').innerHTML = 'Add your OpenRouter key above to request an overview.'; byId('aiOverviewBox').className = 'ai-overview visible'; return; }
+    prompt = 'Give a short, cautious overview of this food place using only the supplied facts. Do not invent ratings, reviews, opening hours, prices, or menu items. Mention what is known and what is missing. Place: ' + JSON.stringify(selectedPlace);
+    payload = JSON.stringify({ model: model, temperature: 0.2, messages: [{ role: 'system', content: 'You summarize place data accurately in two short sentences.' }, { role: 'user', content: prompt }] });
+    byId('aiOverviewText').innerHTML = 'Loading overview...';
+    byId('aiOverviewBox').className = 'ai-overview visible';
+    xhr('POST', 'https://openrouter.ai/api/v1/chat/completions', payload, function (error, text) {
+      var response;
+      var content;
+      if (error) { byId('aiOverviewText').innerHTML = 'The AI overview could not be loaded. Check the key and try again.'; return; }
+      try { response = JSON.parse(text); content = response.choices[0].message.content; } catch (ignore) { content = 'No overview was returned.'; }
+      byId('aiOverviewText').innerHTML = safe(content).replace(/\n/g, '<br>');
     });
   }
 
   byId('foodTab').onclick = function () { showSection('food'); };
   byId('ridesTab').onclick = function () { showSection('rides'); };
-  byId('findButton').onclick = findPlaces;
+  byId('findButton').onclick = function () { var value = byId('locationInput').value.replace(/^\s+|\s+$/g, ''); if (value) { lookupLocationName(value); } else { setStatus('Type a location first.'); } };
+  byId('myLocationButton').onclick = requestLocation;
   byId('rankButton').onclick = rankWithOpenRouter;
-  byId('locationInput').onkeypress = function (event) { if (event.keyCode === 13) { findPlaces(); } };
+  byId('locationInput').onkeypress = function (event) { if (event.keyCode === 13) { byId('findButton').onclick(); } };
   byId('rideSearch').onkeyup = function () { renderRides(this.value); };
+  byId('detailClose').onclick = closeDetails;
+  byId('aiClose').onclick = function () { byId('aiOverviewBox').className = 'ai-overview'; byId('aiOverviewBox').setAttribute('aria-hidden', 'true'); };
+  byId('aiOverviewButton').onclick = requestAiOverview;
+  byId('detailDirections').onclick = function () { if (selectedPlace) { openOfficialSite(directionsUrl(selectedPlace)); } };
+  byId('detailBuy').onclick = function () { openOfficialSite('https://www.ubereats.com/'); };
   bindExternalButtons(document);
   renderFood('');
   renderRides('');

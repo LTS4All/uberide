@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>Uberide</title>
   <link rel="apple-touch-icon" href="icon.png">
-  <link rel="stylesheet" href="style.css?v=ios6">
+  <link rel="stylesheet" href="style.css?v=ios6-places2">
 </head>
 <body>
   <div class="app-shell">
@@ -18,55 +18,68 @@
     </header>
 
     <nav class="tabs" aria-label="Sections">
-      <button id="foodTab" class="tab active" type="button">&#127869; Food</button>
-      <button id="ridesTab" class="tab" type="button">&#128663; Rides</button>
+      <button id="foodTab" class="tab active" type="button"><span class="tab-glyph">F</span><span>Food</span></button>
+      <button id="ridesTab" class="tab" type="button"><span class="tab-glyph">R</span><span>Rides</span></button>
     </nav>
 
     <main>
       <section id="foodSection" class="section active-section">
         <div class="heading-row">
           <div>
-            <h1>Places near you</h1>
-            <p>Type a location to find nearby food places.</p>
+            <h1>Nearby food</h1>
+            <p>Find places, read details, then continue on Uber Eats.</p>
           </div>
-          <span class="nearby">&#9679; Nearby</span>
+          <span class="nearby">&#9679; READY</span>
         </div>
         <div class="search-box location-search">
           <span class="search-icon">&#128205;</span>
-          <input id="locationInput" type="search" placeholder="Location, town or postcode" autocomplete="off">
+          <input id="locationInput" type="search" placeholder="Town, street or postcode" autocomplete="off">
           <button id="findButton" type="button">FIND</button>
         </div>
+        <button id="myLocationButton" class="location-button" type="button">USE MY LOCATION</button>
         <div class="ai-box">
-          <div class="ai-title">Optional OpenRouter ranking</div>
-          <div class="ai-copy">Use your own key to let AI rank the places found. It is never stored in this repository.</div>
+          <div class="ai-title">Optional AI overview</div>
+          <div class="ai-copy">Add your OpenRouter key only for this session. It is never stored or published.</div>
           <input id="openRouterKey" class="key-input" type="password" placeholder="OpenRouter key (optional)" autocomplete="off">
           <input id="openRouterModel" class="key-input" type="text" value="openai/gpt-4o-mini" aria-label="OpenRouter model">
-          <button id="rankButton" class="small-button" type="button">FIND PLACES + AI RANK</button>
+          <button id="rankButton" class="small-button" type="button">RANK PLACES</button>
         </div>
-        <div id="status" class="status" aria-live="polite">Enter a location to load nearby places.</div>
+        <div id="status" class="status" aria-live="polite">Type a location or use your location.</div>
         <div id="foodList" class="list-card"></div>
-        <button class="wide-button" type="button" data-url="https://www.ubereats.com/">Open Uber Eats &#8599;</button>
+        <button class="wide-button" type="button" data-url="https://www.ubereats.com/">OPEN UBER EATS &#8594;</button>
       </section>
 
       <section id="ridesSection" class="section">
         <div class="heading-row">
           <div>
-            <h1>Request a ride</h1>
-            <p>Choose an Uber-style ride, then continue on Uber.</p>
+            <h1>Choose a ride</h1>
+            <p>Select an Uber-style ride, then continue on the official Uber site.</p>
           </div>
-          <span class="nearby">&#9679; Nearby</span>
+          <span class="nearby">&#9679; READY</span>
         </div>
         <div class="search-box">
           <span class="search-icon">&#128269;</span>
           <input id="rideSearch" type="search" placeholder="Search ride type" autocomplete="off">
         </div>
         <div id="rideList" class="ride-list"></div>
-        <button class="wide-button" type="button" data-url="https://m.uber.com/ul/">Open Uber &#8599;</button>
+        <button class="wide-button" type="button" data-url="https://m.uber.com/ul/">OPEN UBER &#8594;</button>
       </section>
     </main>
 
+    <div id="detailPanel" class="detail-panel" aria-hidden="true">
+      <div class="detail-header"><strong id="detailTitle">Place details</strong><button id="detailClose" class="close-button" type="button" aria-label="Close">X</button></div>
+      <div id="detailBody" class="detail-body"></div>
+      <button id="detailDirections" class="wide-button" type="button">GET DIRECTIONS &#8594;</button>
+      <button id="detailBuy" class="wide-button" type="button">OPEN ON UBER EATS &#8594;</button>
+      <div id="aiOverviewBox" class="ai-overview" aria-hidden="true">
+        <div class="ai-overview-header"><strong>AI overview</strong><button id="aiClose" class="close-button small-close" type="button" aria-label="Close AI overview">X</button></div>
+        <div id="aiOverviewText">Add an OpenRouter key to request an overview.</div>
+      </div>
+      <button id="aiOverviewButton" class="small-button" type="button">SHOW AI OVERVIEW</button>
+    </div>
+
     <p class="disclaimer">Uberide is an independent interface. Checkout, payment, accounts, and ride requests happen on official Uber websites.</p>
   </div>
-  <script src="app.js"></script>
+  <script src="app.js?v=places2"></script>
 </body>
 </html>
