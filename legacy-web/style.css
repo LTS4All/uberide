@@ -72,3 +72,15 @@ p { margin: 2px 0 0; color: #555; font-size: 11px; line-height: 15px; text-shado
 .ai-overview-header { min-height: 25px; margin-bottom: 4px; }
 .small-close { width: 24px; height: 23px; }
 @media only screen and (max-width: 320px) { .detail-photo { width: 87px; height: 64px; } .detail-body { font-size: 10px; } .detail-body p { font-size: 10px; } }
+
+.ai-corner { position: fixed; right: 10px; bottom: 10px; z-index: 20; height: 31px; padding: 0 9px; border: 1px solid #17466d; border-radius: 5px; background: -webkit-gradient(linear, left top, left bottom, from(#75bdf3), color-stop(.48, #3180bf), color-stop(.52, #175f99), to(#0b3f70)); box-shadow: inset 0 1px rgba(255,255,255,.45), 0 1px 2px rgba(0,0,0,.5); color: #fff; font-size: 10px; font-weight: bold; text-shadow: 0 -1px #17436c; }
+.ai-panel { display: none; position: fixed; right: 10px; bottom: 48px; z-index: 20; width: 270px; padding: 8px; border: 1px solid #555; border-radius: 7px; background: -webkit-gradient(linear, left top, left bottom, from(#f7f7f7), to(#c8c8c8)); box-shadow: 0 2px 7px rgba(0,0,0,.55), inset 0 1px #fff; }
+.ai-panel.visible { display: block; }
+.ai-panel-header { display: table; width: 100%; min-height: 27px; color: #222; font-size: 14px; text-shadow: 0 1px #fff; }
+.ai-panel-header strong { display: table-cell; vertical-align: middle; }
+.ai-panel-header .close-button { display: table-cell; }
+.ai-panel-hint { padding: 4px 1px 6px; color: #555; font-size: 10px; line-height: 13px; text-shadow: 0 1px #fff; }
+.ai-question { display: block; width: 100%; height: 32px; padding: 0 7px; border: 1px solid #888; border-radius: 4px; background: #fff; color: #222; font-size: 11px; box-shadow: inset 0 1px 3px rgba(0,0,0,.15); }
+.ai-panel .small-button { margin-top: 7px; }
+.ai-answer { min-height: 38px; margin-top: 7px; padding: 6px; border: 1px solid #aaa; border-radius: 4px; background: #fff; color: #333; font-size: 10px; line-height: 13px; }
+@media only screen and (max-width: 320px) { .ai-panel { right: 6px; bottom: 46px; width: 250px; } .ai-corner { right: 6px; bottom: 7px; } }

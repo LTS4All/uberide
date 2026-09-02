@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>Uberide</title>
   <link rel="apple-touch-icon" href="icon.png">
-  <link rel="stylesheet" href="style.css?v=ios6-places3">
+  <link rel="stylesheet" href="style.css?v=ios6-ai4">
 </head>
 <body>
   <div class="app-shell">
@@ -37,13 +37,6 @@
           <button id="findButton" type="button">FIND</button>
         </div>
         <button id="myLocationButton" class="location-button" type="button">USE MY LOCATION</button>
-        <div class="ai-box">
-          <div class="ai-title">Optional AI overview</div>
-          <div class="ai-copy">Add your OpenRouter key only for this session. It is never stored or published.</div>
-          <input id="openRouterKey" class="key-input" type="password" placeholder="OpenRouter key (optional)" autocomplete="off">
-          <input id="openRouterModel" class="key-input" type="text" value="openai/gpt-4o-mini" aria-label="OpenRouter model">
-          <button id="rankButton" class="small-button" type="button">RANK PLACES</button>
-        </div>
         <div id="status" class="status" aria-live="polite">Type a location or use your location.</div>
         <div id="foodList" class="list-card"></div>
       </section>
@@ -70,15 +63,19 @@
       <div id="detailBody" class="detail-body"></div>
       <button id="detailDirections" class="wide-button" type="button">GET DIRECTIONS &#8594;</button>
       <button id="detailBuy" class="wide-button" type="button">OPEN ON UBER EATS &#8594;</button>
-      <div id="aiOverviewBox" class="ai-overview" aria-hidden="true">
-        <div class="ai-overview-header"><strong>AI overview</strong><button id="aiClose" class="close-button small-close" type="button" aria-label="Close AI overview">X</button></div>
-        <div id="aiOverviewText">Add an OpenRouter key to request an overview.</div>
-      </div>
-      <button id="aiOverviewButton" class="small-button" type="button">SHOW AI OVERVIEW</button>
+    </div>
+
+    <button id="aiCornerButton" class="ai-corner" type="button">Uberide AI</button>
+    <div id="aiPanel" class="ai-panel" aria-hidden="true">
+      <div class="ai-panel-header"><strong>Uberide AI</strong><button id="aiPanelClose" class="close-button" type="button" aria-label="Close Uberide AI">X</button></div>
+      <div id="aiPanelHint" class="ai-panel-hint">Ask about the selected place, directions, reviews, or ordering.</div>
+      <input id="aiQuestion" class="ai-question" type="text" placeholder="Ask a question" autocomplete="off">
+      <button id="aiAskButton" class="small-button" type="button">ASK</button>
+      <div id="aiAnswer" class="ai-answer">Uberide AI is ready.</div>
     </div>
 
     <p class="disclaimer">Uberide is an independent interface. Checkout, payment, accounts, and ride requests happen on official Uber websites.</p>
   </div>
-  <script src="app.js?v=places3"></script>
+  <script src="app.js?v=ai4"></script>
 </body>
 </html>

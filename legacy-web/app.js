@@ -129,8 +129,6 @@
     byId('detailBody').innerHTML = body;
     byId('detailPanel').className = 'detail-panel visible';
     byId('detailPanel').setAttribute('aria-hidden', 'false');
-    byId('aiOverviewBox').className = 'ai-overview';
-    byId('aiOverviewBox').setAttribute('aria-hidden', 'true');
   }
 
   function closeDetails() {
@@ -193,63 +191,50 @@
     setStatus('Found ' + nextPlaces.length + ' places near ' + safe(locationName) + '. Tap a place for details.');
   }
 
-  function rankWithOpenRouter() {
-    var key = byId('openRouterKey').value.replace(/^\s+|\s+$/g, '');
-    var model = byId('openRouterModel').value.replace(/^\s+|\s+$/g, '') || 'openai/gpt-4o-mini';
-    var prompt;
-    var payload;
-    if (!key) { setStatus('Add your OpenRouter key first, or find places without AI.'); return; }
-    if (!places.length) { setStatus('Find places near a location first.'); return; }
-    prompt = 'Rank these nearby food places for a user. Return only a JSON array of the place names in the best order. Do not invent places or reviews. Places: ' + JSON.stringify(places);
-    payload = JSON.stringify({ model: model, temperature: 0, messages: [{ role: 'system', content: 'You rank nearby food places. Return only valid JSON.' }, { role: 'user', content: prompt }] });
-    setStatus('Asking OpenRouter to rank the places...');
-    xhr('POST', 'https://openrouter.ai/api/v1/chat/completions', payload, function (error, text) {
-      var response;
-      var content;
-      var names;
-      var ranked = [];
-      var i;
-      var j;
-      if (error) { setStatus('OpenRouter request failed. Check the key and try again.'); return; }
-      try { response = JSON.parse(text); content = response.choices[0].message.content; } catch (ignore) { content = ''; }
-      try { names = JSON.parse(content.replace(/```json|```/g, '').replace(/^\s+|\s+$/g, '')); } catch (ignoreAgain) { names = []; }
-      if (!(names instanceof Array)) { setStatus('OpenRouter returned an unexpected ranking.'); return; }
-      for (i = 0; i < names.length; i += 1) { for (j = 0; j < places.length; j += 1) { if (places[j].name === names[i]) { ranked.push(places[j]); break; } } }
-      for (i = 0; i < places.length; i += 1) { if (ranked.indexOf(places[i]) === -1) { ranked.push(places[i]); } }
-      places = ranked; renderFood(''); setStatus('AI ranking applied. Tap a place for its overview.');
-    });
+  function openAiPanel() {
+    byId('aiPanel').className = 'ai-panel visible';
+    byId('aiPanel').setAttribute('aria-hidden', 'false');
+    byId('aiQuestion').focus();
   }
 
-  function requestAiOverview() {
-    var key = byId('openRouterKey').value.replace(/^\s+|\s+$/g, '');
-    var model = byId('openRouterModel').value.replace(/^\s+|\s+$/g, '') || 'openai/gpt-4o-mini';
-    var prompt;
-    var payload;
-    if (!selectedPlace) { return; }
-    if (!key) { byId('aiOverviewText').innerHTML = 'Add your OpenRouter key above to request an overview.'; byId('aiOverviewBox').className = 'ai-overview visible'; return; }
-    prompt = 'Give a short, cautious overview of this food place using only the supplied facts. Do not invent ratings, reviews, opening hours, prices, or menu items. Mention what is known and what is missing. Place: ' + JSON.stringify(selectedPlace);
-    payload = JSON.stringify({ model: model, temperature: 0.2, messages: [{ role: 'system', content: 'You summarize place data accurately in two short sentences.' }, { role: 'user', content: prompt }] });
-    byId('aiOverviewText').innerHTML = 'Loading overview...';
-    byId('aiOverviewBox').className = 'ai-overview visible';
-    xhr('POST', 'https://openrouter.ai/api/v1/chat/completions', payload, function (error, text) {
-      var response;
-      var content;
-      if (error) { byId('aiOverviewText').innerHTML = 'The AI overview could not be loaded. Check the key and try again.'; return; }
-      try { response = JSON.parse(text); content = response.choices[0].message.content; } catch (ignore) { content = 'No overview was returned.'; }
-      byId('aiOverviewText').innerHTML = safe(content).replace(/\n/g, '<br>');
-    });
+  function closeAiPanel() {
+    byId('aiPanel').className = 'ai-panel';
+    byId('aiPanel').setAttribute('aria-hidden', 'true');
+  }
+
+  function answerAi() {
+    var question = byId('aiQuestion').value.replace(/^\s+|\s+$/g, '').toLowerCase();
+    var answer;
+    if (!question) { byId('aiAnswer').innerHTML = 'Type a question first.'; return; }
+    if (selectedPlace) {
+      if (question.indexOf('direction') !== -1 || question.indexOf('map') !== -1 || question.indexOf('where') !== -1) {
+        answer = 'Use GET DIRECTIONS in the ' + safe(selectedPlace.name) + ' details panel to open Google Maps.';
+      } else if (question.indexOf('order') !== -1 || question.indexOf('buy') !== -1 || question.indexOf('uber') !== -1) {
+        answer = 'Use OPEN ON UBER EATS in the ' + safe(selectedPlace.name) + ' details panel to continue ordering on Uber Eats.';
+      } else if (question.indexOf('review') !== -1 || question.indexOf('rating') !== -1) {
+        answer = safe(selectedPlace.review || 'Reviews are not provided by the current place data source.');
+      } else {
+        answer = safe(selectedPlace.name) + ' is listed as ' + safe(selectedPlace.cuisine || 'a food place') + ' near ' + safe(selectedPlace.location || lastLocation || 'your selected location') + '. ' + safe(selectedPlace.review || 'Review information is not provided.');
+      }
+    } else if (question.indexOf('location') !== -1 || question.indexOf('near') !== -1) {
+      answer = 'Type a US or UK location, or tap USE MY LOCATION, to find nearby named places.';
+    } else {
+      answer = 'Tap a place for details. I can explain its location, reviews, directions, or how to continue on Uber Eats.';
+    }
+    byId('aiAnswer').innerHTML = answer;
   }
 
   byId('foodTab').onclick = function () { showSection('food'); };
   byId('ridesTab').onclick = function () { showSection('rides'); };
   byId('findButton').onclick = function () { var value = byId('locationInput').value.replace(/^\s+|\s+$/g, ''); if (value) { lookupLocationName(value); } else { setStatus('Type a location first.'); } };
   byId('myLocationButton').onclick = requestLocation;
-  byId('rankButton').onclick = rankWithOpenRouter;
   byId('locationInput').onkeypress = function (event) { if (event.keyCode === 13) { byId('findButton').onclick(); } };
   byId('rideSearch').onkeyup = function () { renderRides(this.value); };
   byId('detailClose').onclick = closeDetails;
-  byId('aiClose').onclick = function () { byId('aiOverviewBox').className = 'ai-overview'; byId('aiOverviewBox').setAttribute('aria-hidden', 'true'); };
-  byId('aiOverviewButton').onclick = requestAiOverview;
+  byId('aiCornerButton').onclick = openAiPanel;
+  byId('aiPanelClose').onclick = closeAiPanel;
+  byId('aiAskButton').onclick = answerAi;
+  byId('aiQuestion').onkeypress = function (event) { if (event.keyCode === 13) { answerAi(); } };
   byId('detailDirections').onclick = function () { if (selectedPlace) { openOfficialSite(directionsUrl(selectedPlace)); } };
   byId('detailBuy').onclick = function () { openOfficialSite('https://www.ubereats.com/'); };
   bindExternalButtons(document);
