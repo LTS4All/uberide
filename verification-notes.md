@@ -1,3 +1,3 @@
-# Visual verification
+# Live interaction verification
 
-The live GitHub Pages site at https://lts4all.github.io/uberide/ was opened in the browser after the iOS 6 redesign. At the compact viewport it shows a brushed gray/black navigation bar, glossy blue segmented Food/Rides tabs, gray pinstripe background, inset white search field, grouped list cards, glossy blue BUY buttons, and local restaurant photos. The location and OpenRouter controls remain visible and usable.
+On https://lts4all.github.io/uberide/?v=places2, tapping a place opened a detail panel with photo, Location, Place name, Category, Reviews, GET DIRECTIONS, OPEN ON UBER EATS, and an X close button. Tapping SHOW AI OVERVIEW opened an AI overview panel with its own explicit X close button and a safe message when no OpenRouter key was entered.
