@@ -1,3 +1,3 @@
-# Verification notes
+# Visual verification
 
-The compact preview was opened at the active WebDev URL and rendered successfully on a narrow viewport. The Food section shows the black Uberide wordmark, pure white background, searchable restaurant list, BUY buttons, and official Uber Eats handoff. Clicking the Rides tab switched the page to UberX, Uber Comfort, and UberXL cards with GO buttons and an Open Uber handoff. No map is rendered in the current UI.
+The live GitHub Pages site at https://lts4all.github.io/uberide/ was opened in the browser after the iOS 6 redesign. At the compact viewport it shows a brushed gray/black navigation bar, glossy blue segmented Food/Rides tabs, gray pinstripe background, inset white search field, grouped list cards, glossy blue BUY buttons, and local restaurant photos. The location and OpenRouter controls remain visible and usable.
