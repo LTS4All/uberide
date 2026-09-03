@@ -1,27 +1,43 @@
-# Uberide legacy iOS target
+# Uberide native iOS 9.3.5 app
 
-This folder contains the Objective-C integration starter for a native iOS 9.3.5 build. `UBRHomeViewController` is the compact iPod-oriented Food/Rides UI; it intentionally does not display a map. The preview app in the root is an Expo prototype; Expo SDK 54 itself does not run on iOS 9.3.5, so the native target must be built separately.
+This directory is the **native Objective-C app**, separate from the earlier web prototype. It targets an iPod touch running iOS 9.3.5 and uses UIKit, Core Location, a compact curved iOS 6-inspired interface, real bundled food photos, an Order Food section, Rides, place details, Google Maps directions, and an embedded official web handoff for Uber Eats and Uber rides.
 
-## Map
+## Open the project
 
-The earlier `UBRMapViewController` sample uses MapLibre Native and the public OpenFreeMap Liberty style:
+Open `Uberide.xcodeproj` with a legacy-compatible Xcode installation that still contains an iOS 9-compatible iPhoneOS SDK. The project target is `com.uberide.legacy`, deployment target 9.3, device family iPhone/iPod, and architectures armv7/arm64. Add the files under `Uberide/` and the resources under `Uberide/Assets/` to the target if Xcode does not pick them up automatically.
 
-```text
-https://tiles.openfreemap.org/styles/liberty
-```
+## Order and Uber behavior
 
-Keep OpenStreetMap/OpenMapTiles attribution visible in the shipped map UI and follow OpenFreeMap's current usage terms.
+Food BUY buttons and the detail dialog open `https://www.ubereats.com/` inside a native `UIWebView`. Ride GO buttons open `https://m.uber.com/ul/` in the same way. Uberide does not scrape Uber or Uber Eats, process payment, or copy Uber content. It uses official web handoffs and the authorized Uber API client only where an approved OAuth token and scope are available.
 
-The current Uberide screen does not use or show this map controller, per the product design request. It can be removed from a native target if map support is not planned.
+The bundled photos are local lightweight assets. Replace them only with images that are legally reusable or covered by the local restaurant/town owner’s permission, and preserve any required attribution.
 
-## Uber API
+## Location
 
-`UBRUberAPIClient` demonstrates the authorized active-request boundary. It requires an Uber OAuth access token and fetches details from the request-specific endpoint. The production app must exchange the OAuth authorization code on a secure server; never ship an Uber client secret in the app and never scrape Uber's consumer app.
+The app includes typed location entry and a **USE MY LOCATION** control backed by Core Location. It uses iOS 9-compatible APIs and shows a fallback message when permission is denied. The user’s location is not silently collected or uploaded.
 
-Uber fleet live-location APIs are restricted to authorized fleet organizations and require the appropriate privileged scope. They are not a general-purpose way to locate arbitrary drivers. The UI must show no location until a valid authorized response includes coordinates.
+## Uberide AI
 
-Before shipping, confirm the current Uber Developer terms, scopes, endpoint versions, and approval status for the specific use case.
+The corner Uberide AI control is a key-free local helper. It answers basic questions from the currently selected place facts and explains how to open directions or Uber Eats. It does not use OpenRouter, does not require an API key, and does not make an undisclosed network AI request.
 
-## Certificates
+## Build and fakesign
 
-Uberide must not install certificates or profiles. OpenFreeMap and Uber use HTTPS and do not require a third-party certificate for ordinary API use. If an employer or device administrator provides a profile, verify its source and install it manually through iOS Settings only under that administrator's instruction.
+A final device IPA requires a Mac or other compatible legacy iOS build environment. The current Linux sandbox has no `xcodebuild`, iPhoneOS SDK, or `ldid`, so it cannot compile or sign the IPA here. On the legacy build machine:
+
+1. Open the project in the compatible Xcode version.
+2. Select the Uberide target, set a signing identity suitable for the jailbroken test device, and build the Release app bundle.
+3. Run `./fakesign-ipa.sh path/to/Uberide.app build/Uberide-fakesigned.ipa` with a compatible `ldid` installed.
+4. Transfer the IPA to the user’s own compatible jailbroken iPod touch and install it using the device’s supported jailbreak installer/trust component.
+
+The resulting IPA is **jailbreak-only** and is not intended for stock iOS. Fakesigning bypasses Apple’s normal distribution signing; do not use it to distribute the app to other people or to install profiles/certificates from untrusted sources.
+
+## Files
+
+- `Uberide.xcodeproj/project.pbxproj` — native Xcode project configuration.
+- `Uberide/main.m` — application entry point.
+- `Uberide/UBRAppDelegate.*` — window and navigation root.
+- `Uberide/UBRHomeViewController.*` — Food/Rides UI, location, details, AI helper, and web handoffs.
+- `Uberide/UBRUberAPIClient.*` — authorized Uber API boundary; no scraping.
+- `Uberide/Assets/` — icon and bundled food photos.
+- `fakesign-ipa.sh` — jailbreak-only IPA packaging script.
+- `native-build-settings.txt` — deployment and architecture reference.

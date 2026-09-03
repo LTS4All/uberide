@@ -1,8 +1,5 @@
 #import <UIKit/UIKit.h>
+#import <CoreLocation/CoreLocation.h>
 
-NS_ASSUME_NONNULL_BEGIN
-
-@interface UBRHomeViewController : UIViewController
+@interface UBRHomeViewController : UIViewController <CLLocationManagerDelegate, UITextFieldDelegate, UIWebViewDelegate>
 @end
-
-NS_ASSUME_NONNULL_END

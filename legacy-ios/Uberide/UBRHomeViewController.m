@@ -1,199 +1,214 @@
 #import "UBRHomeViewController.h"
+#import <QuartzCore/QuartzCore.h>
 
 static NSString * const UBRUberEatsURL = @"https://www.ubereats.com/";
 static NSString * const UBRUberRidesURL = @"https://m.uber.com/ul/";
 
 @interface UBRHomeViewController ()
-@property (nonatomic, strong) UISegmentedControl *sectionControl;
-@property (nonatomic, strong) UIStackView *contentStack;
 @property (nonatomic, strong) UIScrollView *scrollView;
+@property (nonatomic, strong) UIView *contentView;
+@property (nonatomic, strong) UISegmentedControl *sectionControl;
+@property (nonatomic, strong) UITextField *locationField;
+@property (nonatomic, strong) UILabel *statusLabel;
+@property (nonatomic, strong) CLLocationManager *locationManager;
+@property (nonatomic, strong) CLGeocoder *geocoder;
+@property (nonatomic, strong) NSArray *foods;
+@property (nonatomic, strong) NSArray *rides;
+@property (nonatomic, strong) NSDictionary *selectedPlace;
 @end
 
 @implementation UBRHomeViewController
 
-- (void)openUberFromButton:(UIButton *)sender {
-    NSString *urlString = sender.accessibilityHint;
-    if (urlString.length > 0) {
-        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString]];
-    }
-}
-
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.view.backgroundColor = [UIColor whiteColor];
+    self.view.backgroundColor = [UIColor colorWithWhite:0.93 alpha:1.0];
+    self.foods = @[
+        @{ @"name": @"Pret A Manger", @"detail": @"Sandwiches · Coffee", @"note": @"Popular near you", @"photo": @"food-table.jpg" },
+        @{ @"name": @"PizzaExpress", @"detail": @"Pizza · Italian", @"note": @"Comfort food favourites", @"photo": @"food-table.jpg" },
+        @{ @"name": @"Five Guys", @"detail": @"Burgers · American", @"note": @"Made to order", @"photo": @"restaurant-exterior.jpg" },
+        @{ @"name": @"Wagamama", @"detail": @"Japanese · Noodles", @"note": @"Fresh bowls and sides", @"photo": @"restaurant-exterior.jpg" },
+        @{ @"name": @"Costa Coffee", @"detail": @"Coffee · Bakery", @"note": @"Coffee and light bites", @"photo": @"food-table.jpg" },
+        @{ @"name": @"Nando's", @"detail": @"Chicken · Portuguese", @"note": @"Grilled chicken and sides", @"photo": @"restaurant-exterior.jpg" }
+    ];
+    self.rides = @[
+        @{ @"name": @"UberX", @"detail": @"Affordable everyday rides" },
+        @{ @"name": @"Uber Comfort", @"detail": @"Extra legroom and comfort" },
+        @{ @"name": @"UberXL", @"detail": @"Room for more passengers" }
+    ];
+    self.geocoder = [[CLGeocoder alloc] init];
     [self buildInterface];
     [self showFood];
 }
 
 - (void)buildInterface {
-    self.scrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
-    self.scrollView.translatesAutoresizingMaskIntoConstraints = NO;
+    self.scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
+    self.scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [self.view addSubview:self.scrollView];
-    [NSLayoutConstraint activateConstraints:@[
-        [self.scrollView.topAnchor constraintEqualToAnchor:self.view.topAnchor],
-        [self.scrollView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
-        [self.scrollView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
-        [self.scrollView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor]
-    ]];
+    self.contentView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 700)];
+    [self.scrollView addSubview:self.contentView];
 
-    self.contentStack = [[UIStackView alloc] initWithFrame:CGRectZero];
-    self.contentStack.axis = UILayoutConstraintAxisVertical;
-    self.contentStack.spacing = 12.0;
-    self.contentStack.alignment = UIStackViewAlignmentFill;
-    self.contentStack.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.scrollView addSubview:self.contentStack];
-    [NSLayoutConstraint activateConstraints:@[
-        [self.contentStack.topAnchor constraintEqualToAnchor:self.scrollView.topAnchor constant:8.0],
-        [self.contentStack.bottomAnchor constraintEqualToAnchor:self.scrollView.bottomAnchor constant:-18.0],
-        [self.contentStack.leadingAnchor constraintEqualToAnchor:self.scrollView.leadingAnchor constant:10.0],
-        [self.contentStack.trailingAnchor constraintEqualToAnchor:self.scrollView.trailingAnchor constant:-10.0],
-        [self.contentStack.widthAnchor constraintEqualToAnchor:self.view.widthAnchor constant:-20.0]
-    ]];
-
-    UIStackView *top = [[UIStackView alloc] initWithArrangedSubviews:@[
-        [self smallIconButtonWithTitle:@"⌾"],
-        [self labelWithText:@"Uberide" size:20 weight:UIFontWeightRegular],
-        [self smallIconButtonWithTitle:@"☰"]
-    ]];
-    top.axis = UILayoutConstraintAxisHorizontal;
-    top.alignment = UIStackViewAlignmentCenter;
-    top.distribution = UIStackViewDistributionEqualSpacing;
-    [self.contentStack addArrangedSubview:top];
+    UILabel *brand = [[UILabel alloc] initWithFrame:CGRectMake(12, 8, self.view.bounds.size.width - 24, 32)];
+    brand.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    brand.text = @"Uberide";
+    brand.textAlignment = NSTextAlignmentCenter;
+    brand.font = [UIFont systemFontOfSize:22.0];
+    brand.textColor = [UIColor blackColor];
+    [self.contentView addSubview:brand];
 
     self.sectionControl = [[UISegmentedControl alloc] initWithItems:@[@"Food", @"Rides"]];
+    self.sectionControl.frame = CGRectMake(10, 48, self.view.bounds.size.width - 20, 34);
+    self.sectionControl.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     self.sectionControl.selectedSegmentIndex = 0;
     [self.sectionControl addTarget:self action:@selector(sectionChanged:) forControlEvents:UIControlEventValueChanged];
-    [self.contentStack addArrangedSubview:self.sectionControl];
+    [self.contentView addSubview:self.sectionControl];
+
+    self.locationField = [[UITextField alloc] initWithFrame:CGRectMake(10, 92, self.view.bounds.size.width - 94, 36)];
+    self.locationField.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    self.locationField.placeholder = @"US or UK town, street or postcode";
+    self.locationField.borderStyle = UITextBorderStyleRoundedRect;
+    self.locationField.backgroundColor = [UIColor whiteColor];
+    self.locationField.font = [UIFont systemFontOfSize:12.0];
+    self.locationField.returnKeyType = UIReturnKeySearch;
+    self.locationField.delegate = self;
+    [self.contentView addSubview:self.locationField];
+
+    UIButton *find = [self blueButtonWithTitle:@"FIND" frame:CGRectMake(self.view.bounds.size.width - 78, 92, 68, 36)];
+    find.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+    [find addTarget:self action:@selector(findLocation:) forControlEvents:UIControlEventTouchUpInside];
+    [self.contentView addSubview:find];
+
+    UIButton *nearby = [self silverButtonWithTitle:@"USE MY LOCATION" frame:CGRectMake(10, 134, self.view.bounds.size.width - 20, 30)];
+    nearby.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    [nearby addTarget:self action:@selector(useMyLocation:) forControlEvents:UIControlEventTouchUpInside];
+    [self.contentView addSubview:nearby];
+
+    self.statusLabel = [[UILabel alloc] initWithFrame:CGRectMake(12, 168, self.view.bounds.size.width - 24, 24)];
+    self.statusLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    self.statusLabel.font = [UIFont systemFontOfSize:10.0];
+    self.statusLabel.textColor = [UIColor darkGrayColor];
+    [self.contentView addSubview:self.statusLabel];
+
+    UIButton *ai = [self blueButtonWithTitle:@"Uberide AI" frame:CGRectMake(self.view.bounds.size.width - 95, self.view.bounds.size.height - 48, 85, 32)];
+    ai.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleTopMargin;
+    [ai addTarget:self action:@selector(openAI:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:ai];
 }
 
 - (void)sectionChanged:(UISegmentedControl *)sender {
-    if (sender.selectedSegmentIndex == 0) {
-        [self showFood];
-    } else {
-        [self showRides];
-    }
+    if (sender.selectedSegmentIndex == 0) { [self showFood]; } else { [self showRides]; }
 }
 
-- (void)clearContent {
-    while (self.contentStack.arrangedSubviews.count > 2) {
-        UIView *view = self.contentStack.arrangedSubviews.lastObject;
-        [self.contentStack removeArrangedSubview:view];
-        [view removeFromSuperview];
+- (void)removeRows {
+    NSArray *subviews = [self.contentView.subviews copy];
+    for (UIView *view in subviews) {
+        if (view.tag == 900) { [view removeFromSuperview]; }
     }
 }
 
 - (void)showFood {
-    [self clearContent];
-    [self.contentStack addArrangedSubview:[self labelWithText:@"Order food" size:24 weight:UIFontWeightBold]];
-    [self.contentStack addArrangedSubview:[self labelWithText:@"Real restaurants, then checkout on Uber Eats." size:12 weight:UIFontWeightRegular]];
-    [self.contentStack addArrangedSubview:[self searchFieldWithPlaceholder:@"Search restaurants or cuisine"]];
-
-    NSArray *places = @[
-        @[@"Pret A Manger", @"Sandwiches · Coffee", @"Popular near you"],
-        @[@"PizzaExpress", @"Pizza · Italian", @"Comfort food favourites"],
-        @[@"Five Guys", @"Burgers · American", @"Made to order"],
-        @[@"Wagamama", @"Japanese · Noodles", @"Fresh bowls and sides"]
-    ];
-    for (NSArray *place in places) {
-        [self.contentStack addArrangedSubview:[self placeRow:place]];
+    [self removeRows];
+    [self addHeading:@"Order Food" subtitle:@"Choose a place, then continue securely on Uber Eats."];
+    CGFloat y = 230.0;
+    for (NSDictionary *place in self.foods) {
+        [self addPlace:place atY:y];
+        y += 78.0;
     }
-    [self.contentStack addArrangedSubview:[self webButtonWithTitle:@"Open Uber Eats" URL:UBRUberEatsURL]];
+    self.contentView.frame = CGRectMake(0, 0, self.view.bounds.size.width, y + 18.0);
+    self.scrollView.contentSize = self.contentView.bounds.size;
+    self.statusLabel.text = @"Type a location or use your location.";
 }
 
 - (void)showRides {
-    [self clearContent];
-    [self.contentStack addArrangedSubview:[self labelWithText:@"Request a ride" size:24 weight:UIFontWeightBold]];
-    [self.contentStack addArrangedSubview:[self labelWithText:@"Choose an Uber-style ride, then continue on Uber." size:12 weight:UIFontWeightRegular]];
-    [self.contentStack addArrangedSubview:[self searchFieldWithPlaceholder:@"Search ride type"]];
-
-    NSArray *rides = @[
-        @[@"UberX", @"Affordable everyday rides"],
-        @[@"Uber Comfort", @"Extra legroom and comfort"],
-        @[@"UberXL", @"Room for more passengers"]
-    ];
-    for (NSArray *ride in rides) {
-        [self.contentStack addArrangedSubview:[self rideRow:ride]];
+    [self removeRows];
+    [self addHeading:@"Rides" subtitle:@"Choose an Uber-style ride, then continue on Uber."];
+    CGFloat y = 230.0;
+    for (NSDictionary *ride in self.rides) {
+        [self addRide:ride atY:y];
+        y += 78.0;
     }
-    [self.contentStack addArrangedSubview:[self webButtonWithTitle:@"Open Uber" URL:UBRUberRidesURL]];
+    self.contentView.frame = CGRectMake(0, 0, self.view.bounds.size.width, y + 18.0);
+    self.scrollView.contentSize = self.contentView.bounds.size;
+    self.statusLabel.text = @"Select a ride type.";
 }
 
-- (UILabel *)labelWithText:(NSString *)text size:(CGFloat)size weight:(CGFloat)weight {
-    UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
-    label.text = text;
-    label.textColor = [UIColor colorWithWhite:0.07 alpha:1.0];
-    label.font = [UIFont systemFontOfSize:size weight:weight];
-    label.numberOfLines = 0;
-    return label;
+- (void)addHeading:(NSString *)title subtitle:(NSString *)subtitle {
+    UILabel *heading = [[UILabel alloc] initWithFrame:CGRectMake(12, 194, self.view.bounds.size.width - 24, 28)];
+    heading.tag = 900; heading.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    heading.text = title; heading.font = [UIFont boldSystemFontOfSize:23.0]; heading.textColor = [UIColor blackColor];
+    [self.contentView addSubview:heading];
+    UILabel *sub = [[UILabel alloc] initWithFrame:CGRectMake(12, 220, self.view.bounds.size.width - 24, 18)];
+    sub.tag = 900; sub.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    sub.text = subtitle; sub.font = [UIFont systemFontOfSize:10.0]; sub.textColor = [UIColor darkGrayColor];
+    [self.contentView addSubview:sub];
 }
 
-- (UIButton *)smallIconButtonWithTitle:(NSString *)title {
-    UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
-    [button setTitle:title forState:UIControlStateNormal];
-    [button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    button.titleLabel.font = [UIFont systemFontOfSize:20.0];
-    return button;
+- (void)addPlace:(NSDictionary *)place atY:(CGFloat)y {
+    UIView *card = [self cardAtY:y];
+    UIImageView *image = [[UIImageView alloc] initWithFrame:CGRectMake(7, 7, 62, 62)];
+    image.image = [UIImage imageNamed:place[@"photo"]]; image.contentMode = UIViewContentModeScaleAspectFill; image.clipsToBounds = YES; image.layer.cornerRadius = 7.0;
+    [card addSubview:image];
+    UIButton *info = [UIButton buttonWithType:UIButtonTypeCustom]; info.frame = CGRectMake(76, 5, card.bounds.size.width - 143, 67); info.tag = 901; info.accessibilityValue = place[@"name"];
+    info.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft; info.titleLabel.numberOfLines = 3;
+    [info setTitle:[NSString stringWithFormat:@"%@\n%@\n%@", place[@"name"], place[@"detail"], place[@"note"]] forState:UIControlStateNormal];
+    [info setTitleColor:[UIColor blackColor] forState:UIControlStateNormal]; info.titleLabel.font = [UIFont systemFontOfSize:11.0];
+    [info addTarget:self action:@selector(placeInfo:) forControlEvents:UIControlEventTouchUpInside]; [card addSubview:info];
+    UIButton *buy = [self blueButtonWithTitle:@"BUY" frame:CGRectMake(card.bounds.size.width - 60, 22, 52, 34)]; buy.accessibilityHint = UBRUberEatsURL; buy.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+    [buy addTarget:self action:@selector(openWebFromButton:) forControlEvents:UIControlEventTouchUpInside]; [card addSubview:buy];
 }
 
-- (UITextField *)searchFieldWithPlaceholder:(NSString *)placeholder {
-    UITextField *field = [[UITextField alloc] initWithFrame:CGRectZero];
-    field.placeholder = placeholder;
-    field.borderStyle = UITextBorderStyleRoundedRect;
-    field.font = [UIFont systemFontOfSize:13.0];
-    field.clearButtonMode = UITextFieldViewModeWhileEditing;
-    field.heightAnchor.constraintEqualToConstant:40.0].active = YES;
-    return field;
+- (void)addRide:(NSDictionary *)ride atY:(CGFloat)y {
+    UIView *card = [self cardAtY:y];
+    UILabel *icon = [[UILabel alloc] initWithFrame:CGRectMake(9, 12, 48, 48)]; icon.text = @"U"; icon.textAlignment = NSTextAlignmentCenter; icon.font = [UIFont boldSystemFontOfSize:22.0]; icon.textColor = [UIColor whiteColor]; icon.backgroundColor = [UIColor darkGrayColor]; icon.layer.cornerRadius = 24.0; icon.clipsToBounds = YES; [card addSubview:icon];
+    UILabel *copy = [[UILabel alloc] initWithFrame:CGRectMake(72, 12, card.bounds.size.width - 142, 52)]; copy.autoresizingMask = UIViewAutoresizingFlexibleWidth; copy.numberOfLines = 3; copy.text = [NSString stringWithFormat:@"%@\n%@\nContinue securely on Uber", ride[@"name"], ride[@"detail"]]; copy.font = [UIFont systemFontOfSize:11.0]; copy.textColor = [UIColor blackColor]; [card addSubview:copy];
+    UIButton *go = [self blueButtonWithTitle:@"GO" frame:CGRectMake(card.bounds.size.width - 60, 22, 52, 34)]; go.accessibilityHint = UBRUberRidesURL; go.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin; [go addTarget:self action:@selector(openWebFromButton:) forControlEvents:UIControlEventTouchUpInside]; [card addSubview:go];
 }
 
-- (UIView *)placeRow:(NSArray *)place {
-    return [self rowWithTitle:place[0] detail:place[1] note:place[2] buttonTitle:@"BUY" URL:UBRUberEatsURL dark:NO];
+- (UIView *)cardAtY:(CGFloat)y {
+    UIView *card = [[UIView alloc] initWithFrame:CGRectMake(10, y, self.view.bounds.size.width - 20, 76)]; card.tag = 900; card.autoresizingMask = UIViewAutoresizingFlexibleWidth; card.backgroundColor = [UIColor whiteColor]; card.layer.cornerRadius = 10.0; card.layer.borderColor = [UIColor colorWithWhite:0.72 alpha:1.0].CGColor; card.layer.borderWidth = 1.0; card.layer.shadowColor = [UIColor blackColor].CGColor; card.layer.shadowOpacity = 0.15; card.layer.shadowOffset = CGSizeMake(0, 1); [self.contentView addSubview:card]; return card;
 }
 
-- (UIView *)rideRow:(NSArray *)ride {
-    return [self rowWithTitle:ride[0] detail:ride[1] note:@"Continue securely on Uber" buttonTitle:@"GO" URL:UBRUberRidesURL dark:YES];
+- (UIButton *)blueButtonWithTitle:(NSString *)title frame:(CGRect)frame {
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom]; button.frame = frame; button.layer.cornerRadius = 7.0; button.clipsToBounds = YES; button.backgroundColor = [UIColor colorWithRed:0.08 green:0.35 blue:0.63 alpha:1.0]; [button setTitle:title forState:UIControlStateNormal]; [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal]; button.titleLabel.font = [UIFont boldSystemFontOfSize:11.0]; return button;
 }
 
-- (UIView *)rowWithTitle:(NSString *)title detail:(NSString *)detail note:(NSString *)note buttonTitle:(NSString *)buttonTitle URL:(NSString *)url dark:(BOOL)dark {
-    UIView *container = [[UIView alloc] initWithFrame:CGRectZero];
-    container.layer.borderColor = [UIColor colorWithWhite:0.80 alpha:1.0].CGColor;
-    container.layer.borderWidth = 1.0;
-    container.layer.cornerRadius = 4.0;
-    container.heightAnchor.constraintEqualToConstant:76.0].active = YES;
-
-    UILabel *titleLabel = [self labelWithText:title size:14 weight:UIFontWeightBold];
-    UILabel *detailLabel = [self labelWithText:detail size:11 weight:UIFontWeightRegular];
-    UILabel *noteLabel = [self labelWithText:note size:10 weight:UIFontWeightRegular];
-    noteLabel.textColor = [UIColor grayColor];
-    UIStackView *copy = [[UIStackView alloc] initWithArrangedSubviews:@[titleLabel, detailLabel, noteLabel]];
-    copy.axis = UILayoutConstraintAxisVertical;
-    copy.spacing = 2.0;
-    copy.translatesAutoresizingMaskIntoConstraints = NO;
-
-    UIButton *action = [self webButtonWithTitle:buttonTitle URL:url];
-    action.translatesAutoresizingMaskIntoConstraints = NO;
-    [container addSubview:copy];
-    [container addSubview:action];
-    [NSLayoutConstraint activateConstraints:@[
-        [copy.leadingAnchor constraintEqualToAnchor:container.leadingAnchor constant:10.0],
-        [copy.centerYAnchor constraintEqualToAnchor:container.centerYAnchor],
-        [action.trailingAnchor constraintEqualToAnchor:container.trailingAnchor constant:-9.0],
-        [action.centerYAnchor constraintEqualToAnchor:container.centerYAnchor],
-        [action.widthAnchor constraintEqualToConstant:47.0],
-        [action.heightAnchor constraintEqualToConstant:34.0],
-        [copy.trailingAnchor constraintLessThanOrEqualToAnchor:action.leadingAnchor constant:-8.0]
-    ]];
-    return container;
+- (UIButton *)silverButtonWithTitle:(NSString *)title frame:(CGRect)frame {
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom]; button.frame = frame; button.layer.cornerRadius = 7.0; button.clipsToBounds = YES; button.backgroundColor = [UIColor colorWithWhite:0.72 alpha:1.0]; [button setTitle:title forState:UIControlStateNormal]; [button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal]; button.titleLabel.font = [UIFont boldSystemFontOfSize:10.0]; return button;
 }
 
-- (UIButton *)webButtonWithTitle:(NSString *)title URL:(NSString *)url {
-    UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
-    [button setTitle:title forState:UIControlStateNormal];
-    [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    button.backgroundColor = [UIColor colorWithWhite:0.08 alpha:1.0];
-    button.layer.cornerRadius = 3.0;
-    button.titleLabel.font = [UIFont boldSystemFontOfSize:11.0];
-    button.accessibilityHint = url;
-    [button addTarget:self action:@selector(openUberFromButton:) forControlEvents:UIControlEventTouchUpInside];
-    return button;
+- (void)placeInfo:(UIButton *)sender {
+    for (NSDictionary *place in self.foods) { if ([place[@"name"] isEqualToString:sender.accessibilityValue]) { self.selectedPlace = place; break; } }
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:self.selectedPlace[@"name"] message:[NSString stringWithFormat:@"Location: %@\nCategory: %@\nReviews: Not provided by the place data source.", self.locationField.text.length ? self.locationField.text : @"Location not supplied", self.selectedPlace[@"detail"]] preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Directions" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { [self openDirections]; }]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Uber Eats" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { [self openOfficialPage:UBRUberEatsURL]; }]];
+    [self presentViewController:alert animated:YES completion:nil];
 }
+
+- (void)findLocation:(UIButton *)sender { [self.locationField resignFirstResponder]; if (!self.locationField.text.length) { self.statusLabel.text = @"Type a town, street, or postcode first."; return; } self.statusLabel.text = [NSString stringWithFormat:@"Finding places near %@...", self.locationField.text]; [self.geocoder geocodeAddressString:self.locationField.text completionHandler:^(NSArray *placemarks, NSError *error) { dispatch_async(dispatch_get_main_queue(), ^{ self.statusLabel.text = error || !placemarks.count ? @"Location not found. Try another place." : [NSString stringWithFormat:@"Location found: %@", self.locationField.text]; }); }]; }
+
+- (void)useMyLocation:(UIButton *)sender { self.statusLabel.text = @"Requesting your location..."; self.locationManager = [[CLLocationManager alloc] init]; self.locationManager.delegate = self; [self.locationManager requestWhenInUseAuthorization]; [self.locationManager startUpdatingLocation]; }
+
+- (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations { [manager stopUpdatingLocation]; CLLocation *location = locations.lastObject; self.locationField.text = @"Current location"; self.statusLabel.text = [NSString stringWithFormat:@"Location ready: %.4f, %.4f", location.coordinate.latitude, location.coordinate.longitude]; }
+- (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error { self.statusLabel.text = @"Location unavailable. Type a place instead."; }
+- (BOOL)textFieldShouldReturn:(UITextField *)textField { [self findLocation:nil]; return YES; }
+
+- (void)openAI:(UIButton *)sender {
+    NSString *place = self.selectedPlace[@"name"] ?: @"no selected place";
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Uberide AI" message:[NSString stringWithFormat:@"Ask about %@, directions, reviews, or ordering. Answers use only loaded place facts.", place] preferredStyle:UIAlertControllerStyleAlert];
+    [alert addTextFieldWithConfigurationHandler:^(UITextField *field) { field.placeholder = @"Ask a question"; }];
+    [alert addAction:[UIAlertAction actionWithTitle:@"X" style:UIAlertActionStyleCancel handler:nil]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Ask" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { UIAlertController *answer = [UIAlertController alertControllerWithTitle:@"Uberide AI" message:[NSString stringWithFormat:@"%@ is listed in Uberide. For ordering, use the Uber Eats button; for travel, use Directions. Review scores are not supplied.", place] preferredStyle:UIAlertControllerStyleAlert]; [answer addAction:[UIAlertAction actionWithTitle:@"X" style:UIAlertActionStyleCancel handler:nil]]; [self presentViewController:answer animated:YES completion:nil]; }]];
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
+- (void)openDirections { NSString *destination = [NSString stringWithFormat:@"%@, %@", self.selectedPlace[@"name"] ?: @"food", self.locationField.text ?: @""]; [self openOfficialPage:[NSString stringWithFormat:@"https://www.google.com/maps/dir/?api=1&destination=%@", [destination stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]]; }
+- (void)openWebFromButton:(UIButton *)sender { [self openOfficialPage:sender.accessibilityHint]; }
+
+- (void)openOfficialPage:(NSString *)urlString {
+    UIViewController *controller = [[UIViewController alloc] init]; controller.view.backgroundColor = [UIColor whiteColor];
+    UIButton *close = [self silverButtonWithTitle:@"X" frame:CGRectMake(8, 24, 38, 32)]; [close addTarget:self action:@selector(closeWeb:) forControlEvents:UIControlEventTouchUpInside]; [controller.view addSubview:close];
+    UIWebView *web = [[UIWebView alloc] initWithFrame:CGRectMake(0, 64, controller.view.bounds.size.width, controller.view.bounds.size.height - 64)]; web.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight; web.delegate = self; [web loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:urlString]]]; [controller.view addSubview:web]; [self presentViewController:controller animated:YES completion:nil];
+}
+- (void)closeWeb:(UIButton *)sender { [self dismissViewControllerAnimated:YES completion:nil]; }
 
 @end

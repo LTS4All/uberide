@@ -1,0 +1,11 @@
+PRODUCT_NAME = Uberide
+PRODUCT_BUNDLE_IDENTIFIER = com.uberide.legacy
+IPHONEOS_DEPLOYMENT_TARGET = 9.3
+TARGETED_DEVICE_FAMILY = 1
+SDKROOT = iphoneos
+ARCHS = armv7 arm64
+INFOPLIST_FILE = Uberide/Info.plist
+SOURCES = main.m UBRAppDelegate.m UBRHomeViewController.m UBRUberAPIClient.m UBRMapViewController.m
+RESOURCES = Assets/food-table.jpg Assets/restaurant-exterior.jpg
+
+Build with a legacy-compatible Xcode/iPhoneOS SDK on macOS. The Linux sandbox cannot run xcodebuild or ldid.
