@@ -35,18 +35,17 @@
     100000000000000000000004 /* Products */ = { isa = PBXGroup; children = ( 100000000000000000000005 ); name = Products; sourceTree = "<group>"; };
     100000000000000000000005 /* Uberide.app */ = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Uberide.app; sourceTree = BUILT_PRODUCTS_DIR; };
 
-    100000000000000000000030 /* Source */ = { isa = PBXGroup; children = ( 100000000000000000000031, 100000000000000000000032, 100000000000000000000033, 100000000000000000000034, 100000000000000000000035, 100000000000000000000036 ); name = Source; path = Uberide; sourceTree = "<group>"; };
+    100000000000000000000030 /* Source */ = { isa = PBXGroup; children = ( 100000000000000000000031, 100000000000000000000032, 100000000000000000000033, 100000000000000000000034, 100000000000000000000036 ); name = Source; path = Uberide; sourceTree = "<group>"; };
     100000000000000000000031 /* main.m */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
     100000000000000000000032 /* UBRAppDelegate.m */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UBRAppDelegate.m; sourceTree = "<group>"; };
     100000000000000000000033 /* UBRHomeViewController.m */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UBRHomeViewController.m; sourceTree = "<group>"; };
     100000000000000000000034 /* UBRUberAPIClient.m */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UBRUberAPIClient.m; sourceTree = "<group>"; };
     100000000000000000000035 /* UBRMapViewController.m */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UBRMapViewController.m; sourceTree = "<group>"; };
     100000000000000000000036 /* Info.plist */ = { isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-    100000000000000000000040 /* Headers */ = { isa = PBXGroup; children = ( 100000000000000000000041, 100000000000000000000042, 100000000000000000000043, 100000000000000000000044 ); name = Headers; path = Uberide; sourceTree = "<group>"; };
+    100000000000000000000040 /* Headers */ = { isa = PBXGroup; children = ( 100000000000000000000041, 100000000000000000000042, 100000000000000000000043 ); name = Headers; path = Uberide; sourceTree = "<group>"; };
     100000000000000000000041 /* UBRAppDelegate.h */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UBRAppDelegate.h; sourceTree = "<group>"; };
     100000000000000000000042 /* UBRHomeViewController.h */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UBRHomeViewController.h; sourceTree = "<group>"; };
     100000000000000000000043 /* UBRUberAPIClient.h */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UBRUberAPIClient.h; sourceTree = "<group>"; };
-    100000000000000000000044 /* UBRMapViewController.h */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UBRMapViewController.h; sourceTree = "<group>"; };
     100000000000000000000050 /* Assets */ = { isa = PBXGroup; children = ( 100000000000000000000051, 100000000000000000000052, 100000000000000000000053 ); name = Assets; path = Uberide/Assets; sourceTree = "<group>"; };
     100000000000000000000051 /* icon.png */ = { isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
     100000000000000000000052 /* food-table.jpg */ = { isa = PBXFileReference; lastKnownFileType = image.jpeg; path = food-table.jpg; sourceTree = "<group>"; };
@@ -56,12 +55,11 @@
     100000000000000000000061 /* app delegate build */ = { isa = PBXBuildFile; fileRef = 100000000000000000000032; };
     100000000000000000000062 /* home build */ = { isa = PBXBuildFile; fileRef = 100000000000000000000033; };
     100000000000000000000063 /* API build */ = { isa = PBXBuildFile; fileRef = 100000000000000000000034; };
-    100000000000000000000064 /* map build */ = { isa = PBXBuildFile; fileRef = 100000000000000000000035; };
     100000000000000000000065 /* icon resource */ = { isa = PBXBuildFile; fileRef = 100000000000000000000051; };
     100000000000000000000066 /* food resource */ = { isa = PBXBuildFile; fileRef = 100000000000000000000052; };
     100000000000000000000067 /* restaurant resource */ = { isa = PBXBuildFile; fileRef = 100000000000000000000053; };
 
-    100000000000000000000020 /* Sources */ = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = ( 100000000000000000000060, 100000000000000000000061, 100000000000000000000062, 100000000000000000000063, 100000000000000000000064 ); runOnlyForDeploymentPostprocessing = 0; };
+    100000000000000000000020 /* Sources */ = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = ( 100000000000000000000060, 100000000000000000000061, 100000000000000000000062, 100000000000000000000063 ); runOnlyForDeploymentPostprocessing = 0; };
     100000000000000000000021 /* Resources */ = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = ( 100000000000000000000065, 100000000000000000000066, 100000000000000000000067 ); runOnlyForDeploymentPostprocessing = 0; };
     100000000000000000000022 /* Frameworks */ = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = ( ); runOnlyForDeploymentPostprocessing = 0; };
 

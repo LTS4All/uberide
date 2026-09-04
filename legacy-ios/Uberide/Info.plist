@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
   <key>CFBundleDisplayName</key><string>Uberide</string>
-  <key>CFBundleExecutable</key><string>$(EXECUTABLE_NAME)</string>
+  <key>CFBundleExecutable</key><string>Uberide</string>
   <key>CFBundleIdentifier</key><string>com.uberide.legacy</string>
   <key>CFBundleName</key><string>Uberide</string>
   <key>CFBundlePackageType</key><string>APPL</string>

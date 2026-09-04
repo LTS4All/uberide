@@ -21,7 +21,13 @@ trap 'rm -rf "$WORK_DIR"' EXIT
 mkdir -p "$WORK_DIR/Payload"
 cp -R "$APP_PATH" "$WORK_DIR/Payload/Uberide.app"
 
-ldid -S "$WORK_DIR/Payload/Uberide.app"
+APP_EXECUTABLE="$WORK_DIR/Payload/Uberide.app/$(basename "$APP_PATH" .app)"
+ENTITLEMENTS="${ENTITLEMENTS:-}"
+if [ -n "$ENTITLEMENTS" ] && [ -f "$ENTITLEMENTS" ]; then
+  ldid -S"$ENTITLEMENTS" "$APP_EXECUTABLE"
+else
+  ldid -S "$APP_EXECUTABLE"
+fi
 (cd "$WORK_DIR" && /usr/bin/zip -qry "$OLDPWD/$OUTPUT_IPA" Payload)
 
 echo "Created jailbreak-only fakesigned IPA: $OUTPUT_IPA"

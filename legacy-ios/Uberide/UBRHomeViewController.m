@@ -201,7 +201,7 @@ static NSString * const UBRUberRidesURL = @"https://m.uber.com/ul/";
     [self presentViewController:alert animated:YES completion:nil];
 }
 
-- (void)openDirections { NSString *destination = [NSString stringWithFormat:@"%@, %@", self.selectedPlace[@"name"] ?: @"food", self.locationField.text ?: @""]; [self openOfficialPage:[NSString stringWithFormat:@"https://www.google.com/maps/dir/?api=1&destination=%@", [destination stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]]; }
+- (void)openDirections { NSString *destination = [NSString stringWithFormat:@"%@, %@", self.selectedPlace[@"name"] ?: @"food", self.locationField.text ?: @""]; [self openOfficialPage:[NSString stringWithFormat:@"https://www.google.com/maps/dir/?api=1&destination=%@", [destination stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]]]; }
 - (void)openWebFromButton:(UIButton *)sender { [self openOfficialPage:sender.accessibilityHint]; }
 
 - (void)openOfficialPage:(NSString *)urlString {

@@ -22,12 +22,11 @@ The corner Uberide AI control is a key-free local helper. It answers basic quest
 
 ## Build and fakesign
 
-A final device IPA requires a Mac or other compatible legacy iOS build environment. The current Linux sandbox has no `xcodebuild`, iPhoneOS SDK, or `ldid`, so it cannot compile or sign the IPA here. On the legacy build machine:
+A final device IPA can be built on a Mac with legacy Xcode or on Linux using the supplied SDK plus Clang/LLD and `ldid`. The current build was produced with the Linux fallback as an arm64 Mach-O IPA. On a compatible build machine:
 
-1. Open the project in the compatible Xcode version.
-2. Select the Uberide target, set a signing identity suitable for the jailbroken test device, and build the Release app bundle.
-3. Run `./fakesign-ipa.sh path/to/Uberide.app build/Uberide-fakesigned.ipa` with a compatible `ldid` installed.
-4. Transfer the IPA to the user’s own compatible jailbroken iPod touch and install it using the device’s supported jailbreak installer/trust component.
+1. Set `SDKROOT` to the supplied `iPhoneOS9.2.sdk` directory.
+2. Run `SDKROOT=/path/to/iPhoneOS9.2.sdk ./build-native.sh` (or open the Xcode project on macOS).
+3. Transfer `build/Uberide-fakesigned.ipa` to the user’s own compatible jailbroken iPod touch and install it using the device’s supported jailbreak installer/trust component.
 
 The resulting IPA is **jailbreak-only** and is not intended for stock iOS. Fakesigning bypasses Apple’s normal distribution signing; do not use it to distribute the app to other people or to install profiles/certificates from untrusted sources.
 
