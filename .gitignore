@@ -68,3 +68,4 @@ Thumbs.db
 # Native iOS build outputs
 legacy-ios/build/
 legacy-ios/build-linux/
+legacy-ios/build-armv7/
