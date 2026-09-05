@@ -53,5 +53,5 @@ cp "$ROOT/Resources/Default@2x.png" "$APP_DIR/Default@2x.png"
 printf 'APPL????' > "$APP_DIR/PkgInfo"
 
 ENTITLEMENTS="${ENTITLEMENTS:-$ROOT/Resources/Surf-standalone.entitlements}"
-"$ROOT/../legacy-ios/fakesign-ipa.sh" "$APP_DIR" "$IPA_PATH" "$ENTITLEMENTS"
+ENTITLEMENTS="$ENTITLEMENTS" "$ROOT/../legacy-ios/fakesign-ipa.sh" "$APP_DIR" "$IPA_PATH"
 printf 'Created Surf ARM32 fakesigned IPA: %s\n' "$IPA_PATH"
