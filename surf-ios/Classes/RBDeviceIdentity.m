@@ -78,20 +78,38 @@ static NSError *RBKeyError(OSStatus status, NSString *message) {
             if (publicKey) CFRelease(publicKey);
             if (privateKey) CFRelease(privateKey);
         }
-        if (status == errSecParam || status == errSecUnimplemented) {
-            NSDictionary *legacyPrivateAttrs = @{(__bridge id)kSecAttrIsPermanent: @YES,
-                                                 (__bridge id)kSecAttrApplicationTag: tag};
-            NSDictionary *legacyParameters = @{(__bridge id)kSecAttrKeyType: (__bridge id)kSecAttrKeyTypeRSA,
-                                               (__bridge id)kSecAttrKeySizeInBits: @2048,
-                                               (__bridge id)kSecPublicKeyAttrs: publicAttrs,
-                                               (__bridge id)kSecPrivateKeyAttrs: legacyPrivateAttrs};
-            status = SecKeyGeneratePair((__bridge CFDictionaryRef)legacyParameters, &publicKey, &privateKey);
-            if (publicKey) CFRelease(publicKey);
-            if (privateKey) CFRelease(privateKey);
+        if (status == errSecParam || status == errSecUnimplemented || status == errSecNotAvailable) {
+            // Some old jailbreak Keychain implementations reject the modern
+            // accessibility value, but accept the older values in sequence.
+            NSArray *accessibilities = @[
+                (__bridge id)kSecAttrAccessibleAfterFirstUnlock,
+                (__bridge id)kSecAttrAccessibleAlways,
+                [NSNull null]
+            ];
+            for (id accessibility in accessibilities) {
+                NSMutableDictionary *legacyPrivateAttrs = [@{
+                    (__bridge id)kSecAttrIsPermanent: @YES,
+                    (__bridge id)kSecAttrApplicationTag: tag
+                } mutableCopy];
+                if (accessibility != [NSNull null]) {
+                    legacyPrivateAttrs[(__bridge id)kSecAttrAccessible] = accessibility;
+                }
+                NSDictionary *legacyParameters = @{
+                    (__bridge id)kSecAttrKeyType: (__bridge id)kSecAttrKeyTypeRSA,
+                    (__bridge id)kSecAttrKeySizeInBits: @2048,
+                    (__bridge id)kSecPublicKeyAttrs: publicAttrs,
+                    (__bridge id)kSecPrivateKeyAttrs: legacyPrivateAttrs
+                };
+                status = SecKeyGeneratePair((__bridge CFDictionaryRef)legacyParameters, &publicKey, &privateKey);
+                if (publicKey) { CFRelease(publicKey); publicKey = NULL; }
+                if (privateKey) { CFRelease(privateKey); privateKey = NULL; }
+                if (status == errSecSuccess) break;
+            }
         }
         if (status != errSecSuccess) {
-            RBLogEvent(@"identity", @"error", @{@"status": @(status)}, @"Device key generation failed");
-            if (error) *error = RBKeyError(status, @"Could not create this device's Surf key");
+            NSString *detail = [NSString stringWithFormat:@"Could not create this device's Surf key (Security status %d)", (int)status];
+            RBLogEvent(@"identity", @"error", @{ @"status": @(status) }, detail);
+            if (error) *error = RBKeyError(status, detail);
             return nil;
         }
         publicData = [self publicKeyDataForServerID:serverID error:error];
