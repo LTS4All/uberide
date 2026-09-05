@@ -14,7 +14,7 @@ The bundled photos are local lightweight assets. Replace them only with images t
 
 ## Location
 
-The app includes typed location entry and a **USE MY LOCATION** control backed by Core Location. It uses iOS 9-compatible APIs and shows a fallback message when permission is denied. The user’s location is not silently collected or uploaded.
+The app includes typed location entry and a **USE MY LOCATION** control backed by Core Location. It uses iOS 9-compatible APIs and shows a fallback message when permission is denied. The user’s location is not silently collected or uploaded. After geocoding, the app sends the coordinates to the public Overpass endpoint at `https://overpass-api.de/api/interpreter` and requests up to 100 nearby named places within 5 km using `amenity=restaurant`, `amenity=cafe`, `amenity=fast_food`, and `amenity=pub`. Overpass/OpenStreetMap data does not provide review scores, so the detail view states that clearly.
 
 ## Uberide AI
 
