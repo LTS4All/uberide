@@ -69,6 +69,26 @@ static NSError *RBKeyError(OSStatus status, NSString *message) {
         OSStatus status = SecKeyGeneratePair((__bridge CFDictionaryRef)parameters, &publicKey, &privateKey);
         if (publicKey) CFRelease(publicKey);
         if (privateKey) CFRelease(privateKey);
+        // Older jailbroken iOS builds can retain one half of a failed pair,
+        // or reject the ThisDeviceOnly accessibility attribute. Recover
+        // without changing Surf's per-server RSA identity model.
+        if (status == errSecDuplicateItem) {
+            [self deleteKeyForServerID:serverID];
+            status = SecKeyGeneratePair((__bridge CFDictionaryRef)parameters, &publicKey, &privateKey);
+            if (publicKey) CFRelease(publicKey);
+            if (privateKey) CFRelease(privateKey);
+        }
+        if (status == errSecParam || status == errSecUnimplemented) {
+            NSDictionary *legacyPrivateAttrs = @{(__bridge id)kSecAttrIsPermanent: @YES,
+                                                 (__bridge id)kSecAttrApplicationTag: tag};
+            NSDictionary *legacyParameters = @{(__bridge id)kSecAttrKeyType: (__bridge id)kSecAttrKeyTypeRSA,
+                                               (__bridge id)kSecAttrKeySizeInBits: @2048,
+                                               (__bridge id)kSecPublicKeyAttrs: publicAttrs,
+                                               (__bridge id)kSecPrivateKeyAttrs: legacyPrivateAttrs};
+            status = SecKeyGeneratePair((__bridge CFDictionaryRef)legacyParameters, &publicKey, &privateKey);
+            if (publicKey) CFRelease(publicKey);
+            if (privateKey) CFRelease(privateKey);
+        }
         if (status != errSecSuccess) {
             RBLogEvent(@"identity", @"error", @{@"status": @(status)}, @"Device key generation failed");
             if (error) *error = RBKeyError(status, @"Could not create this device's Surf key");

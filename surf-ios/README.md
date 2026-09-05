@@ -18,3 +18,7 @@ SDKROOT=/home/ubuntu/ios92-sdk/iPhoneOS9.2.sdk \
 The generated IPA targets `armv7` and iOS 6.0+, and is **jailbreak-only fakesigned**. It is not installable on stock iOS with Apple’s normal trust chain.
 
 The standalone package uses bundle identifier `com.uberide.surf.browser` and build version `100`, rather than Surf’s original `space.seg6.surf` identity. This prevents Sideloadly or a jailbreak package manager from treating it as an upgrade of an existing system Surf package, which is the cause of the “ApplicationVerificationFailed / missing upgrade entitlement” dialog. No ordinary certificate can add Apple’s private `com.apple.private.mobileinstall.*` upgrade entitlement; on stock iOS, use a genuine Apple-signed provisioning profile instead.
+
+## Pairing recovery
+
+Use a fresh invitation after installing this build: stop/cancel any old invitation on the PC, run `surf pair` again, and enter the new six-digit code or scan the new QR code. The client now retries stale duplicate RSA keys and has a legacy-Keychain fallback for older iOS builds. If the PC server was reinstalled or its `SURF_HOME` was replaced, remove the old saved server in Surf and pair again because the server certificate fingerprint intentionally changes. The app still needs Keychain access; a fake certificate cannot create Apple’s private entitlements, so stock-iOS sideloading may still fail even though the ARM32 jailbreak package is correctly signed for a jailbreak trust environment.
