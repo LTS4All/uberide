@@ -16,12 +16,14 @@ if ! command -v ldid >/dev/null 2>&1; then
 fi
 
 mkdir -p "$(dirname "$OUTPUT_IPA")"
+OUTPUT_IPA="$(cd "$(dirname "$OUTPUT_IPA")" && pwd)/$(basename "$OUTPUT_IPA")"
 WORK_DIR="$(mktemp -d /tmp/uberide-fakesign.XXXXXX)"
 trap 'rm -rf "$WORK_DIR"' EXIT
 mkdir -p "$WORK_DIR/Payload"
-cp -R "$APP_PATH" "$WORK_DIR/Payload/Uberide.app"
+APP_BUNDLE_NAME="$(basename "$APP_PATH")"
+cp -R "$APP_PATH" "$WORK_DIR/Payload/$APP_BUNDLE_NAME"
 
-APP_EXECUTABLE="$WORK_DIR/Payload/Uberide.app/$(basename "$APP_PATH" .app)"
+APP_EXECUTABLE="$WORK_DIR/Payload/$APP_BUNDLE_NAME/$(basename "$APP_PATH" .app)"
 ENTITLEMENTS="${ENTITLEMENTS:-}"
 if [ -n "$ENTITLEMENTS" ] && [ -f "$ENTITLEMENTS" ]; then
   ldid -S"$ENTITLEMENTS" "$APP_EXECUTABLE"
@@ -29,7 +31,7 @@ else
   ldid -S "$APP_EXECUTABLE"
 fi
 rm -f "$OUTPUT_IPA"
-(cd "$WORK_DIR" && /usr/bin/zip -qry "$OLDPWD/$OUTPUT_IPA" Payload)
+(cd "$WORK_DIR" && /usr/bin/zip -qry "$OUTPUT_IPA" Payload)
 
 echo "Created jailbreak-only fakesigned IPA: $OUTPUT_IPA"
 echo "This IPA is not for stock iOS and requires a compatible jailbreak-side trust component."
