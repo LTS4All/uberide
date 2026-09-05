@@ -27,7 +27,7 @@
     <string>Lucide.ttf</string>
   </array>
   <key>CFBundleIdentifier</key>
-  <string>space.seg6.surf</string>
+  <string>com.uberide.surf.browser</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
@@ -37,7 +37,7 @@
   <key>CFBundleShortVersionString</key>
   <string>0.15.5</string>
   <key>CFBundleVersion</key>
-  <string>15005</string>
+  <string>100</string>
   <key>SurfCompatibilityVersion</key>
   <integer>1</integer>
   <key>CFBundleSupportedPlatforms</key>
