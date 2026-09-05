@@ -28,6 +28,7 @@ if [ -n "$ENTITLEMENTS" ] && [ -f "$ENTITLEMENTS" ]; then
 else
   ldid -S "$APP_EXECUTABLE"
 fi
+rm -f "$OUTPUT_IPA"
 (cd "$WORK_DIR" && /usr/bin/zip -qry "$OLDPWD/$OUTPUT_IPA" Payload)
 
 echo "Created jailbreak-only fakesigned IPA: $OUTPUT_IPA"

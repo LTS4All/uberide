@@ -10,7 +10,7 @@ Open `Uberide.xcodeproj` with a legacy-compatible Xcode installation that still 
 
 Food BUY buttons and the detail dialog open `https://www.ubereats.com/` inside a native `UIWebView`. Ride GO buttons open `https://m.uber.com/ul/` in the same way. Uberide does not scrape Uber or Uber Eats, process payment, or copy Uber content. It uses official web handoffs and the authorized Uber API client only where an approved OAuth token and scope are available.
 
-The bundled photos are local lightweight assets. Replace them only with images that are legally reusable or covered by the local restaurant/town owner’s permission, and preserve any required attribution.
+Live place cards intentionally use category glyphs rather than repeating a generic photo, because Overpass does not provide restaurant imagery. This avoids presenting a placeholder image as if it represented the real venue.
 
 ## Location
 

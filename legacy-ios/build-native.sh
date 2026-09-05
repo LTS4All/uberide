@@ -50,6 +50,6 @@ else
 fi
 
 cp Uberide/Info.plist "$BUILD_DIR/Uberide.app/Info.plist"
-cp Uberide/Assets/icon.png Uberide/Assets/food-table.jpg Uberide/Assets/restaurant-exterior.jpg "$BUILD_DIR/Uberide.app/"
+cp Uberide/Assets/icon.png "$BUILD_DIR/Uberide.app/"
 printf 'APPL????' > "$BUILD_DIR/Uberide.app/PkgInfo"
 ./fakesign-ipa.sh "$BUILD_DIR/Uberide.app" "$IPA_PATH"

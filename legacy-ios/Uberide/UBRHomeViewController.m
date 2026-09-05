@@ -156,10 +156,15 @@ static NSString * const UBROverpassURL = @"https://overpass-api.de/api/interpret
 
 - (void)addPlace:(NSDictionary *)place atY:(CGFloat)y {
     UIView *card = [self cardAtY:y];
-    UIImageView *image = [[UIImageView alloc] initWithFrame:CGRectMake(7, 7, 62, 62)];
-    NSString *photo = place[@"photo"] ?: @"food-table.jpg";
-    image.image = [UIImage imageNamed:photo]; image.contentMode = UIViewContentModeScaleAspectFill; image.clipsToBounds = YES; image.layer.cornerRadius = 9.0;
-    [card addSubview:image];
+    UILabel *category = [[UILabel alloc] initWithFrame:CGRectMake(7, 7, 62, 62)];
+    category.text = place[@"icon"] ?: @"R";
+    category.textAlignment = NSTextAlignmentCenter;
+    category.font = [UIFont boldSystemFontOfSize:22.0];
+    category.textColor = [UIColor whiteColor];
+    category.backgroundColor = [self accent];
+    category.layer.cornerRadius = 11.0;
+    category.clipsToBounds = YES;
+    [card addSubview:category];
     UIButton *info = [UIButton buttonWithType:UIButtonTypeCustom]; info.frame = CGRectMake(76, 5, card.bounds.size.width - 143, 67); info.tag = 901; info.accessibilityValue = place[@"name"];
     info.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft; info.titleLabel.numberOfLines = 3;
     [info setTitle:[NSString stringWithFormat:@"%@\n%@\n%@", place[@"name"], place[@"detail"], place[@"note"]] forState:UIControlStateNormal];
@@ -245,9 +250,16 @@ static NSString * const UBROverpassURL = @"https://overpass-api.de/api/interpret
             NSString *amenity = tags[@"amenity"] ?: @"place";
             NSString *cuisine = tags[@"cuisine"];
             NSString *detail = cuisine.length ? [NSString stringWithFormat:@"%@ · %@", amenity, cuisine] : amenity;
+            NSString *icon = @"R";
+            if ([amenity isEqualToString:@"cafe"]) { icon = @"C"; }
+            else if ([amenity isEqualToString:@"fast_food"]) { icon = @"F"; }
+            else if ([amenity isEqualToString:@"pub"]) { icon = @"P"; }
+            NSString *cuisineLower = [cuisine lowercaseString];
+            if ([cuisineLower rangeOfString:@"indian"].location != NSNotFound) { icon = @"I"; }
+            else if ([cuisineLower rangeOfString:@"pizza"].location != NSNotFound) { icon = @"Z"; }
             NSString *street = tags[@"addr:street"]; NSString *house = tags[@"addr:housenumber"];
             NSString *note = street.length ? [NSString stringWithFormat:@"%@%@", house.length ? [house stringByAppendingString:@" "] : @"", street] : @"Live OpenStreetMap result";
-            [results addObject:@{ @"name": name, @"detail": detail, @"note": note, @"photo": [amenity isEqualToString:@"cafe"] ? @"food-table.jpg" : @"restaurant-exterior.jpg" }];
+            [results addObject:@{ @"name": name, @"detail": detail, @"note": note, @"icon": icon }];
             if (results.count >= 100) { break; }
         }
         dispatch_async(dispatch_get_main_queue(), ^{
