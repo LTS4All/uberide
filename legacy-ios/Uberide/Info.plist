@@ -15,6 +15,7 @@
   <key>UIStatusBarStyle</key><string>UIStatusBarStyleBlackOpaque</string>
   <key>UIViewControllerBasedStatusBarAppearance</key><false/>
   <key>NSLocationWhenInUseUsageDescription</key><string>Uberide uses your location to find nearby food places and directions.</string>
+  <key>LSApplicationQueriesSchemes</key><array><string>surf</string></array>
   <key>UISupportedInterfaceOrientations</key><array><string>UIInterfaceOrientationPortrait</string></array>
 </dict>
 </plist>

@@ -284,6 +284,11 @@ static NSString * const UBROverpassURL = @"https://overpass-api.de/api/interpret
 - (void)openWebFromButton:(UIButton *)sender { [self openOfficialPage:sender.accessibilityHint]; }
 
 - (void)openOfficialPage:(NSString *)urlString {
+    NSString *surfURL = [NSString stringWithFormat:@"surf-https://%@", [urlString substringFromIndex:[@"https://" length]]];
+    NSURL *surfAddress = [NSURL URLWithString:surfURL];
+    if ([[UIApplication sharedApplication] canOpenURL:surfAddress] && [[UIApplication sharedApplication] openURL:surfAddress]) {
+        return;
+    }
     UIViewController *controller = [[UIViewController alloc] init]; controller.view.backgroundColor = [self charcoal];
     UIButton *close = [self secondaryButtonWithTitle:@"X" frame:CGRectMake(8, 24, 38, 32)]; [close addTarget:self action:@selector(closeWeb:) forControlEvents:UIControlEventTouchUpInside]; [controller.view addSubview:close];
     UIWebView *web = [[UIWebView alloc] initWithFrame:CGRectMake(0, 64, controller.view.bounds.size.width, controller.view.bounds.size.height - 64)]; web.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight; web.delegate = self; [web loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:urlString]]]; [controller.view addSubview:web]; [self presentViewController:controller animated:YES completion:nil];

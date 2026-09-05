@@ -8,7 +8,7 @@ Open `Uberide.xcodeproj` with a legacy-compatible Xcode installation that still 
 
 ## Order and Uber behavior
 
-Food BUY buttons and the detail dialog open `https://www.ubereats.com/` inside a native `UIWebView`. Ride GO buttons open `https://m.uber.com/ul/` in the same way. Uberide does not scrape Uber or Uber Eats, process payment, or copy Uber content. It uses official web handoffs and the authorized Uber API client only where an approved OAuth token and scope are available.
+Food BUY buttons and the detail dialog open `https://www.ubereats.com/`; Ride GO buttons open `https://m.uber.com/ul/`. When the open-source MIT-licensed Surf client is installed and paired, Uberide first hands these URLs to Surf using its documented `surf-https://` scheme so the modern page is rendered by Surf’s paired desktop browser. If Surf is not installed or paired, Uberide falls back to its iOS 9 `UIWebView`. Surf is a remote browser client, not an embeddable WebKit replacement: it requires a Surf host/server and device pairing. Uberide does not scrape Uber or Uber Eats, process payment, or copy Uber content.
 
 Live place cards intentionally use category glyphs rather than repeating a generic photo, because Overpass does not provide restaurant imagery. This avoids presenting a placeholder image as if it represented the real venue.
 
